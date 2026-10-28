@@ -57,6 +57,12 @@ button{font:inherit;color:inherit}
 .name{grid-column:1;width:100%;min-width:0;min-height:44px;border:0;background:transparent;color:var(--tx);font:inherit;font-size:17px;font-weight:600;line-height:1.3;
  padding:10px 4px;border-radius:8px;resize:none;overflow:hidden;display:block}
 .name:focus{outline:none;background:var(--bg)}
+.name[readonly]:focus{background:transparent}
+.nm{grid-column:1;min-width:0}
+.by{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--mut);padding:8px 4px 0}
+.by.mine{color:var(--acc)}
+.nm .name{min-height:34px;padding:2px 4px 8px}
+.nm .name:first-child{min-height:44px;padding:10px 4px}
 .x{grid-column:2;grid-row:1;width:44px;height:44px;border:0;background:none;color:var(--mut);font-size:24px;line-height:1;cursor:pointer;border-radius:8px}
 .who{grid-column:1/-1;display:grid;grid-template-columns:34px 1fr 1fr;gap:6px;align-items:center;padding-right:4px}
 .cols{grid-column:1/-1;display:grid;grid-template-columns:34px 1fr 1fr;gap:6px;padding-right:4px;margin-bottom:-2px;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--mut)}
@@ -94,7 +100,10 @@ select:disabled.c-none{color:var(--mut);-webkit-text-fill-color:var(--mut)}
  .rows{gap:0;border:1px solid var(--line);border-radius:12px;background:var(--surf);overflow:hidden}
  .row{border:0;border-bottom:1px solid var(--line);border-radius:0;padding:6px 12px}
  .row:last-child{border-bottom:0}
- .name{grid-column:1;grid-row:1}
+ .nm{grid-column:1;grid-row:1}
+ .nm .name{min-height:30px;padding:0 4px 6px}
+ .nm .name:first-child{min-height:36px;padding:7px 4px}
+ .by{padding:6px 4px 0}
  .who{grid-row:1;grid-template-columns:1fr 1fr;padding-right:0}
  .who.a{grid-column:2}.who.b{grid-column:3}
  .wl,.cols{display:none}
@@ -145,7 +154,7 @@ const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const LVL=[["","—"],["must","Очень важно"],["want","Хочу"],["meh","Всё равно"],["no","Против"]];
 const CMP=[["","—"],["yes","Да"],["maybe","Возможно"],["nope","Нет"]];
 const NOFILTER={lvl:"",cmp:"",diff:false};
-let role=null,items=[],fl={...NOFILTER},channel=null,shownFor=null,pending=false,busy=false,statusTimer=null;
+let role=null,myEmail="",items=[],fl={...NOFILTER},channel=null,shownFor=null,pending=false,busy=false,statusTimer=null;
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const opts=(L,v)=>L.map(o=>`<option value="${o[0]}"${o[0]===v?" selected":""}>${o[1]}</option>`).join("");
@@ -168,13 +177,19 @@ function renderFilters(){
   const diff=`<i class="sep"></i><button type="button" class="chip diff${fl.diff?" on":""}" data-diff="1">Расхождения</button>`;
   $("#filters").innerHTML=grp("Степень желания","lvl",LVL,'<span class="count" id="count"></span>')+grp("Компромисс","cmp",CMP,"",diff);
 }
-const rowHtml=it=>`<div class="row" data-row="${it.id}">
-  <textarea class="name" rows="1" maxlength="200" data-id="${it.id}" aria-label="Желание">${esc(it.text)}</textarea>
-  <button class="x" type="button" data-del="${it.id}" aria-label="Удалить">×</button>
+const roleOf=e=>ROLES[(e||"").toLowerCase()];
+/* пока в базе нет колонки author_email — работаем как раньше (все могут всё) */
+const canEdit=it=>!("author_email" in it)||(it.author_email||"").toLowerCase()===myEmail;
+const rowHtml=it=>{
+  const own=canEdit(it),ar=roleOf(it.author_email);
+  return `<div class="row" data-row="${it.id}">
+  <div class="nm">${ar?`<div class="by${ar===role?" mine":""}">Автор: ${ar==="a"?"Он":"Она"}</div>`:""}<textarea class="name" rows="1" maxlength="200" data-id="${it.id}" aria-label="Желание"${own?"":" readonly"}>${esc(it.text)}</textarea></div>
+  ${own?`<button class="x" type="button" data-del="${it.id}" aria-label="Удалить">×</button>`:""}
   <div class="cols" aria-hidden="true"><i></i><span>Степень</span><span>Компромисс</span></div>
   <div class="who a${role==="a"?" me":""}"><span class="wl">Он</span>${sel(LVL,it.id,"a_lvl",it.a_lvl,"a","Он: степень")}${sel(CMP,it.id,"a_cmp",it.a_cmp,"a","Он: компромисс")}</div>
   <div class="who b${role==="b"?" me":""}"><span class="wl">Она</span>${sel(LVL,it.id,"b_lvl",it.b_lvl,"b","Она: степень")}${sel(CMP,it.id,"b_cmp",it.b_cmp,"b","Она: компромисс")}</div>
 </div>`;
+};
 function autosize(t){t.style.height="auto";t.style.height=t.scrollHeight+"px";}
 function render(){
   pending=false;
@@ -202,7 +217,7 @@ function subscribe(){
 async function showApp(session){
   const email=(session.user.email||"").toLowerCase();
   if(shownFor===email)return;
-  shownFor=email;role=ROLES[email]||null;
+  shownFor=email;myEmail=email;role=ROLES[email]||null;
   $("#login").classList.add("hide");$("#app").classList.remove("hide");
   $("#whoami").textContent=role?`Вы — ${role==="a"?"Он":"Она"}`:"Ваш email не входит в список";
   renderFilters();render();await load();subscribe();
