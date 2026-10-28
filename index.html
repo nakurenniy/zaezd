@@ -88,6 +88,29 @@ select:disabled{background-image:none;padding-right:10px;border-color:transparen
 select:disabled.c-none{color:var(--mut);-webkit-text-fill-color:var(--mut)}
 .empty{padding:28px 12px;text-align:center;color:var(--mut)}
 
+/* уведомления */
+.tools{display:flex;align-items:center;gap:2px;margin:-6px -4px 0 0}
+.bell{position:relative;width:44px;height:44px;border:0;background:none;color:var(--tx);display:grid;place-items:center;border-radius:12px;cursor:pointer}
+.bell .badge{position:absolute;top:4px;right:2px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--acc);color:var(--on-acc);font-size:11px;font-weight:800;line-height:18px;text-align:center}
+.tag{display:inline-block;margin-left:8px;padding:1px 7px;border-radius:999px;background:var(--acc);color:var(--on-acc);font-size:10px;font-weight:800;letter-spacing:.04em;vertical-align:1px}
+.sheet{position:fixed;inset:0;z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet-bg{position:absolute;inset:0;background:rgba(0,0,0,.42)}
+.sheet-panel{position:relative;width:100%;max-width:560px;max-height:80vh;max-height:80dvh;overflow:auto;background:var(--surf);border-radius:18px 18px 0 0;padding:14px 16px max(16px,env(safe-area-inset-bottom))}
+.sheet-head{display:flex;justify-content:space-between;align-items:center}
+.sheet-head h2{margin:0;font-size:19px}
+.sheet-x{width:44px;height:44px;margin-right:-10px;border:0;background:none;color:var(--mut);font-size:26px;cursor:pointer}
+.sheet-sub{margin:0 0 6px;color:var(--mut);font-size:13px}
+.feed{list-style:none;margin:0;padding:0}
+.feed button{display:grid;grid-template-columns:12px 1fr auto;gap:10px;align-items:start;width:100%;min-height:48px;padding:12px 2px;border:0;border-bottom:1px solid var(--line);background:none;color:var(--tx);text-align:left;font-size:15px;cursor:pointer}
+.fdot{width:8px;height:8px;border-radius:50%;margin-top:7px;background:var(--line)}
+.fdot.new{background:var(--acc)}
+.ftxt{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.feed time{color:var(--mut);font-size:12px;white-space:nowrap;margin-top:2px}
+.w-a{color:var(--a-tx)}.w-b{color:var(--b-tx)}
+.readall{width:100%;height:48px;margin-top:12px;border:0;border-radius:12px;background:var(--tx);color:var(--bg);font-size:16px;font-weight:600;cursor:pointer}
+.readall:disabled{opacity:.35;cursor:not-allowed}
+@media (min-width:760px){.sheet{align-items:center}.sheet-panel{border-radius:18px}}
+
 /* вход */
 .login{max-width:340px;margin:10vh auto 0;display:flex;flex-direction:column;gap:10px}
 .login input{height:48px;border:1px solid var(--line);background:var(--surf);color:var(--tx);border-radius:12px;padding:0 14px;font:inherit;font-size:16px;width:100%}
@@ -135,7 +158,13 @@ select:disabled.c-none{color:var(--mut);-webkit-text-fill-color:var(--mut)}
 <div id="app" class="hide">
   <header class="top">
     <div><h1>Съезжаемся 🏠</h1><p class="sub" id="whoami"></p></div>
-    <button class="link" id="out" type="button">Выйти</button>
+    <div class="tools">
+      <button class="bell" id="bell" type="button" aria-label="Что нового">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6.5 2 6.5H4S6 14 6 9Z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>
+        <span class="badge hide" id="bellCount"></span>
+      </button>
+      <button class="link" id="out" type="button">Выйти</button>
+    </div>
   </header>
 
   <section class="filters" id="filters" aria-label="Фильтры"></section>
@@ -149,6 +178,15 @@ select:disabled.c-none{color:var(--mut);-webkit-text-fill-color:var(--mut)}
   <div class="rows" id="rows"></div>
 </div>
 </main>
+<div class="sheet hide" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="sheet-bg" data-close></div>
+  <div class="sheet-panel">
+    <div class="sheet-head"><h2 id="sheetTitle">Что нового</h2><button class="sheet-x" type="button" data-close aria-label="Закрыть">×</button></div>
+    <p class="sheet-sub">Действия партнёра за сутки и всё непрочитанное. Точка — вы этого ещё не видели.</p>
+    <ul class="feed" id="feed"></ul>
+    <button class="readall" id="readAll" type="button">Отметить прочитанным</button>
+  </div>
+</div>
 <div class="status hide" id="status" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -188,9 +226,10 @@ const roleOf=e=>ROLES[(e||"").toLowerCase()];
 /* пока в базе нет колонки author_email — работаем как раньше (все могут всё) */
 const canEdit=it=>!("author_email" in it)||(it.author_email||"").toLowerCase()===myEmail;
 const rowHtml=it=>{
-  const own=canEdit(it),ar=roleOf(it.author_email);
+  const own=canEdit(it),ar=roleOf(it.author_email),mk=markOf(it);
+  const tag=mk?`<span class="tag">${markLabel(mk,role==="a"?"b":"a")}</span>`:"";
   return `<div class="row${ar?" own-"+ar:""}" data-row="${it.id}">
-  <div class="nm">${ar?`<div class="by${ar===role?" mine":""}">Автор: ${ar==="a"?"Он":"Она"}</div>`:""}<textarea class="name" rows="1" maxlength="200" data-id="${it.id}" aria-label="Желание"${own?"":" readonly"}>${esc(it.text)}</textarea></div>
+  <div class="nm">${ar||tag?`<div class="by${ar===role?" mine":""}">${ar?`Автор: ${ar==="a"?"Он":"Она"}`:""}${tag}</div>`:""}<textarea class="name" rows="1" maxlength="200" data-id="${it.id}" aria-label="Желание"${own?"":" readonly"}>${esc(it.text)}</textarea></div>
   ${own?`<button class="x" type="button" data-del="${it.id}" aria-label="Удалить">×</button>`:""}
   <div class="cols" aria-hidden="true"><i></i><span>Степень</span><span>Компромисс</span></div>
   <div class="who a${role==="a"?" me":""}"><span class="wl">Он</span>${sel(LVL,it.id,"a_lvl",it.a_lvl,"a","Он: степень")}${sel(CMP,it.id,"a_cmp",it.a_cmp,"a","Он: компромисс")}</div>
@@ -204,6 +243,7 @@ function render(){
   $("#rows").innerHTML=list.length?list.map(rowHtml).join("")
     :`<div class="empty">${items.length?"Ничего не подходит под фильтр":"Пока пусто — добавьте первое желание выше"}</div>`;
   document.querySelectorAll("textarea.name").forEach(autosize);
+  updateBell();
   const c=$("#count");if(c)c.textContent=items.length?`${list.length} из ${items.length}`:"";
 }
 function safeRender(){
@@ -224,13 +264,13 @@ function subscribe(){
 async function showApp(session){
   const email=(session.user.email||"").toLowerCase();
   if(shownFor===email)return;
-  shownFor=email;myEmail=email;role=ROLES[email]||null;
+  shownFor=email;myEmail=email;role=ROLES[email]||null;loadBaseline();
   $("#login").classList.add("hide");$("#app").classList.remove("hide");
   $("#whoami").textContent=role?`Вы — ${role==="a"?"Он":"Она"}`:"Ваш email не входит в список";
   renderFilters();render();await load();subscribe();
 }
 function showLogin(){
-  shownFor=null;role=null;items=[];
+  shownFor=null;myEmail="";role=null;items=[];closeSheet();
   if(channel){sb.removeChannel(channel);channel=null;}
   $("#app").classList.add("hide");$("#login").classList.remove("hide");
 }
@@ -293,6 +333,83 @@ $("#addForm").addEventListener("submit",async e=>{
     row.scrollIntoView({block:"center",behavior:calm?"auto":"smooth"});
   }
 });
+
+/* уведомления: что нового от партнёра с момента последнего визита */
+let baseline=0,hiddenAt=0,lastFocus=null;
+const ts=v=>v?(Date.parse(v)||0):0;
+const WHO={a:"Он",b:"Она"};
+const VERB={new:{a:"добавил",b:"добавила"},answered:{a:"ответил на",b:"ответила на"},renamed:{a:"переименовал",b:"переименовала"}};
+const saveSeen=t=>{try{localStorage.setItem("seen:"+myEmail,String(t))}catch(_){}};
+function loadBaseline(){
+  let v=null;try{v=localStorage.getItem("seen:"+myEmail)}catch(_){}
+  baseline=v?Number(v):Date.now();          // первый вход: помечать нечего
+  if(!v)saveSeen(baseline);
+}
+function eventsFor(it){
+  const ev=[];if(!role)return ev;
+  const other=role==="a"?"b":"a",ar=roleOf(it.author_email);
+  if(ar===other){
+    const c=ts(it.created_at);if(c)ev.push({id:it.id,kind:"new",t:c,who:other,title:it.text});
+    const x=ts(it.text_at);if(x)ev.push({id:it.id,kind:"renamed",t:x,who:other,title:it.text});
+  }
+  const a=ts(it[other+"_at"]);if(a)ev.push({id:it.id,kind:"answered",t:a,who:other,title:it.text});
+  return ev;
+}
+function markOf(it){
+  const ev=eventsFor(it).filter(e=>e.t>baseline);
+  for(const k of ["new","answered","renamed"])if(ev.some(e=>e.kind===k))return k;
+  return null;
+}
+const markLabel=(k,who)=>k==="new"?"Новое":k==="answered"?`${WHO[who]} ${who==="b"?"ответила":"ответил"}`:"Название изменено";
+function fmt(t){
+  const d=new Date(t),n=new Date(),hm=d.toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"});
+  const day=x=>new Date(x.getFullYear(),x.getMonth(),x.getDate()).getTime(),diff=Math.round((day(n)-day(d))/864e5);
+  return diff<=0?hm:diff===1?`вчера ${hm}`:`${d.toLocaleDateString("ru-RU",{day:"numeric",month:"short"})} ${hm}`;
+}
+function renderFeed(){
+  const since=Math.min(Date.now()-864e5,baseline);
+  const ev=items.flatMap(eventsFor).filter(e=>e.t>=since).sort((x,y)=>y.t-x.t);
+  $("#feed").innerHTML=ev.length?ev.map(e=>`<li><button type="button" data-go="${e.id}"><i class="fdot${e.t>baseline?" new":""}"></i><span class="ftxt"><b class="w-${e.who}">${WHO[e.who]}</b> ${VERB[e.kind][e.who]} «${esc(e.title)}»</span><time>${fmt(e.t)}</time></button></li>`).join("")
+    :`<li class="empty">За последние сутки ничего нового</li>`;
+  $("#readAll").disabled=!items.some(markOf);
+}
+function updateBell(){
+  const n=items.filter(markOf).length,b=$("#bellCount");
+  b.textContent=n>9?"9+":String(n);b.classList.toggle("hide",!n);
+  $("#bell").setAttribute("aria-label",n?`Что нового: ${n}`:"Что нового");
+  if(!$("#sheet").classList.contains("hide"))renderFeed();
+}
+function openSheet(){lastFocus=document.activeElement;renderFeed();$("#sheet").classList.remove("hide");document.body.style.overflow="hidden";$(".sheet-x").focus();}
+function closeSheet(){
+  const s=$("#sheet");if(s.classList.contains("hide"))return;
+  s.classList.add("hide");document.body.style.overflow="";
+  if(lastFocus&&lastFocus.focus)lastFocus.focus();
+}
+function goTo(id){
+  closeSheet();
+  if(!items.some(i=>i.id===id))return;
+  if(!document.querySelector(`[data-row="${id}"]`)){fl={...NOFILTER};renderFilters();render();}
+  const row=document.querySelector(`[data-row="${id}"]`);if(!row)return;
+  row.classList.remove("fresh");void row.offsetWidth;row.classList.add("fresh");
+  row.scrollIntoView({block:"center",behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
+}
+$("#bell").onclick=openSheet;
+$("#readAll").onclick=()=>{baseline=Date.now();saveSeen(baseline);render();};
+$("#sheet").addEventListener("click",e=>{
+  if(e.target.closest("[data-close]")){closeSheet();return;}
+  const g=e.target.closest("[data-go]");if(g)goTo(g.dataset.go);
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeSheet();});
+/* ушли из приложения — всё увиденное считается прочитанным; вернулись надолго — пометки сбрасываются */
+document.addEventListener("visibilitychange",()=>{
+  if(!myEmail)return;
+  if(document.visibilityState==="hidden"){hiddenAt=Date.now();saveSeen(hiddenAt);}
+  else{
+    if(hiddenAt&&Date.now()-hiddenAt>120000){baseline=hiddenAt;render();}
+    hiddenAt=0;load();
+  }
+});
+addEventListener("pagehide",()=>{if(myEmail)saveSeen(Date.now());});
 
 sb.auth.onAuthStateChange((_ev,session)=>{session?showApp(session):showLogin();});
 sb.auth.getSession().then(({data})=>{if(!data.session)showLogin();});
