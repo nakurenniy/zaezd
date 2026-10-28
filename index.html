@@ -3,46 +3,104 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#faf8f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#171614" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Съезд">
 <title>Съезжаемся</title>
 <style>
-:root{--bg:#faf8f5;--surf:#fff;--tx:#1f1d1a;--mut:#7a746b;--line:#e8e3da;--acc:#c2410c;
+:root{--bg:#faf8f5;--surf:#fff;--tx:#1f1d1a;--mut:#7a746b;--line:#e8e3da;--acc:#c2410c;--on-acc:#fff;
 --must:#fde2d3;--want:#fdf0c8;--meh:#ece9e3;--no:#dfe3f3;--yes:#d6efdc;--maybe:#fdf0c8;--nope:#f6d5d5;
-box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root{--bg:#171614;--surf:#211f1c;--tx:#f1ede6;--mut:#9b948a;--line:#35322d;--acc:#fb923c;
+--chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%237a746b' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+@media (prefers-color-scheme:dark){:root{--bg:#171614;--surf:#211f1c;--tx:#f1ede6;--mut:#9b948a;--line:#35322d;--acc:#fb923c;--on-acc:#1f1d1a;
 --must:#5a2f18;--want:#554714;--meh:#34312c;--no:#2b3252;--yes:#1f4a2c;--maybe:#554714;--nope:#5a2424}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-main{max-width:960px;margin:0 auto;padding:20px 14px 60px}
-h1{font-size:22px;margin:0 0 2px}
-.sub{color:var(--mut);margin:0 0 16px;font-size:13px}
-.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
-.bar{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-bottom:12px}
-.grp{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-.grp>span{color:var(--mut);font-size:12px}
-.chip{border:1px solid var(--line);background:var(--surf);color:var(--tx);border-radius:999px;padding:5px 11px;font:inherit;font-size:13px;cursor:pointer}
-.chip.on{background:var(--tx);color:var(--bg);border-color:var(--tx)}
-.wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surf)}
-table{border-collapse:collapse;width:100%;min-width:700px}
-th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
-th{font-size:12px;color:var(--mut);font-weight:600;background:var(--bg)}
-th.g{text-align:center;border-left:1px solid var(--line)}
-td.p{border-left:1px solid var(--line)}
-tr:last-child td{border-bottom:0}
-input.t{width:100%;border:0;background:transparent;color:var(--tx);font:inherit;padding:4px 0;outline:none}
-input.t:focus{border-bottom:1px solid var(--acc)}
-select{width:100%;font:inherit;font-size:13px;color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:5px 6px;background:var(--surf)}
-select:disabled{opacity:.9;appearance:none;-webkit-appearance:none;border-color:transparent;text-align:center}
-select.c-must{background:var(--must)}select.c-want{background:var(--want)}select.c-meh{background:var(--meh)}select.c-no{background:var(--no)}
-select.c-yes{background:var(--yes)}select.c-maybe{background:var(--maybe)}select.c-nope{background:var(--nope)}
-.x{border:0;background:none;color:var(--mut);cursor:pointer;font-size:18px;padding:0 4px}
-.add{display:flex;gap:8px;margin-top:12px}
-.add input,.login input{flex:1;border:1px solid var(--line);background:var(--surf);color:var(--tx);border-radius:10px;padding:10px 12px;font:inherit;width:100%}
-.add button,.login button{border:0;background:var(--acc);color:#fff;border-radius:10px;padding:10px 18px;font:inherit;font-weight:600;cursor:pointer}
-.empty{padding:28px;text-align:center;color:var(--mut)}
-.login{max-width:340px;margin:12vh auto 0;display:flex;flex-direction:column;gap:10px}
-.err{color:#dc2626;font-size:13px;min-height:18px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,"SF Pro Text","Segoe UI",Roboto,sans-serif;touch-action:manipulation}
+main{max-width:960px;margin:0 auto;padding:max(14px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(40px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))}
+h1{font-size:21px;line-height:1.2;margin:0}
+.sub{color:var(--mut);margin:2px 0 0;font-size:13px}
 .hide{display:none!important}
-.link{background:none;border:0;color:var(--mut);font:inherit;font-size:13px;cursor:pointer;text-decoration:underline;padding:0}
+button{font:inherit;color:inherit}
+
+/* шапка */
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+.link{background:none;border:0;color:var(--mut);font-size:14px;cursor:pointer;text-decoration:underline;padding:8px 0 8px 8px;min-height:36px}
+
+/* фильтры: каждая группа в одну строку, при нехватке места — горизонтальный скролл, без переноса */
+.filters{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.flabel{display:flex;justify-content:space-between;align-items:baseline;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--mut);margin:0 2px 4px}
+.count{font-size:12px;font-weight:500;letter-spacing:0;text-transform:none;white-space:nowrap}
+.chips{display:flex;flex-wrap:nowrap;gap:3px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+ margin:0 calc(-1 * max(14px,env(safe-area-inset-left)));padding:0 max(14px,env(safe-area-inset-left))}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:1 0 auto;white-space:nowrap;height:36px;border:1px solid var(--line);background:var(--surf);color:var(--tx);border-radius:999px;padding:0 8px;font-size:13px;cursor:pointer}
+.chip.on{background:var(--tx);color:var(--bg);border-color:var(--tx)}
+.chip.diff{flex:none}
+.sep{flex:none;align-self:center;width:1px;height:20px;background:var(--line);margin:0 3px}
+
+/* добавление */
+.add{display:flex;gap:8px;margin-bottom:14px}
+.add input{flex:1;min-width:0;height:48px;border:1px solid var(--line);background:var(--surf);color:var(--tx);border-radius:12px;padding:0 14px;font:inherit;font-size:16px}
+.add input:focus{outline:2px solid var(--acc);outline-offset:-1px;border-color:transparent}
+.add button{flex:none;height:48px;border:0;background:var(--acc);color:var(--on-acc);border-radius:12px;padding:0 16px;font-weight:600;font-size:16px;cursor:pointer;transition:opacity .15s}
+.add button:disabled{opacity:.35;cursor:not-allowed}
+
+/* список: на телефоне карточки */
+.head{display:none}
+.rows{display:flex;flex-direction:column;gap:10px}
+.row{display:grid;grid-template-columns:1fr 44px;gap:6px 4px;align-items:start;background:var(--surf);border:1px solid var(--line);border-radius:14px;padding:6px 6px 12px 10px}
+.row.fresh{animation:fresh 1.6s ease-out}
+@keyframes fresh{from{box-shadow:0 0 0 3px var(--acc)}to{box-shadow:0 0 0 3px transparent}}
+@media (prefers-reduced-motion:reduce){.row.fresh{animation:none}}
+.name{grid-column:1;width:100%;min-width:0;min-height:44px;border:0;background:transparent;color:var(--tx);font:inherit;font-size:17px;font-weight:600;line-height:1.3;
+ padding:10px 4px;border-radius:8px;resize:none;overflow:hidden;display:block}
+.name:focus{outline:none;background:var(--bg)}
+.x{grid-column:2;grid-row:1;width:44px;height:44px;border:0;background:none;color:var(--mut);font-size:24px;line-height:1;cursor:pointer;border-radius:8px}
+.who{grid-column:1/-1;display:grid;grid-template-columns:34px 1fr 1fr;gap:6px;align-items:center;padding-right:4px}
+.wl{font-size:12px;font-weight:600;color:var(--mut)}
+.who.me .wl{color:var(--acc)}
+select{appearance:none;-webkit-appearance:none;width:100%;min-width:0;height:44px;font:inherit;font-size:16px;color:var(--tx);
+ border:1px solid var(--line);border-radius:10px;padding:0 28px 0 10px;background-color:var(--surf);background-image:var(--chev);background-repeat:no-repeat;background-position:right 10px center;text-overflow:ellipsis}
+select:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+select.c-none{color:var(--mut)}
+select.c-must{background-color:var(--must)}select.c-want{background-color:var(--want)}select.c-meh{background-color:var(--meh)}select.c-no{background-color:var(--no)}
+select.c-yes{background-color:var(--yes)}select.c-maybe{background-color:var(--maybe)}select.c-nope{background-color:var(--nope)}
+select:disabled{background-image:none;padding-right:10px;border-color:transparent;opacity:1;color:var(--tx);-webkit-text-fill-color:var(--tx)}
+select:disabled.c-none{color:var(--mut);-webkit-text-fill-color:var(--mut)}
+.empty{padding:28px 12px;text-align:center;color:var(--mut)}
+
+/* вход */
+.login{max-width:340px;margin:10vh auto 0;display:flex;flex-direction:column;gap:10px}
+.login input{height:48px;border:1px solid var(--line);background:var(--surf);color:var(--tx);border-radius:12px;padding:0 14px;font:inherit;font-size:16px;width:100%}
+.login button{height:48px;border:0;background:var(--acc);color:var(--on-acc);border-radius:12px;font-weight:600;font-size:16px;cursor:pointer}
+.err{color:#dc2626;font-size:13px;min-height:18px}
+
+/* уведомление об ошибке */
+.status{position:fixed;left:50%;bottom:max(16px,env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;max-width:calc(100vw - 32px);z-index:10}
+
+/* широкие экраны: строки таблицы */
+@media (min-width:760px){
+ main{padding-top:24px}
+ select,.name{font-size:14px}
+ select{height:36px}
+ .name{min-height:36px;padding:7px 4px;font-size:15px;font-weight:500}
+ .x{width:36px;height:36px}
+ .head,.row{display:grid;grid-template-columns:minmax(180px,1fr) 300px 300px 36px;gap:0 12px;align-items:center}
+ .head{padding:0 12px;font-size:12px;font-weight:600;color:var(--mut);margin-bottom:6px}
+ .rows{gap:0;border:1px solid var(--line);border-radius:12px;background:var(--surf);overflow:hidden}
+ .row{border:0;border-bottom:1px solid var(--line);border-radius:0;padding:6px 12px}
+ .row:last-child{border-bottom:0}
+ .name{grid-column:1;grid-row:1}
+ .who{grid-row:1;grid-template-columns:1fr 1fr;padding-right:0}
+ .who.a{grid-column:2}.who.b{grid-column:3}
+ .wl{display:none}
+ .x{grid-column:4}
+ .chips{margin:0;padding:0;flex-wrap:wrap}
+ .chip{flex:none}
+ .filters{flex-direction:row;flex-wrap:wrap;gap:12px 24px;align-items:flex-end}
+}
 </style>
 </head>
 <body>
@@ -50,25 +108,30 @@ select.c-yes{background:var(--yes)}select.c-maybe{background:var(--maybe)}select
 <form id="login" class="login hide">
   <h1>Съезжаемся 🏠</h1>
   <p class="sub">Вход только для двоих.</p>
-  <input id="em" type="email" placeholder="Email" autocomplete="username" required>
+  <input id="em" type="email" placeholder="Email" autocomplete="username" autocapitalize="none" autocorrect="off" inputmode="email" required>
   <input id="pw" type="password" placeholder="Пароль" autocomplete="current-password" required>
-  <div class="err" id="err"></div>
+  <div class="err" id="err" role="alert"></div>
   <button type="submit">Войти</button>
 </form>
 
 <div id="app" class="hide">
-  <div class="top">
+  <header class="top">
     <div><h1>Съезжаемся 🏠</h1><p class="sub" id="whoami"></p></div>
-    <button class="link" id="out">Выйти</button>
-  </div>
-  <div class="bar" id="filters"></div>
-  <div class="wrap"><table>
-  <thead><tr><th rowspan="2">Желание</th><th class="g" colspan="2">Он</th><th class="g" colspan="2">Она</th><th rowspan="2"></th></tr>
-  <tr><th class="g">Степень</th><th>Компромисс</th><th class="g">Степень</th><th>Компромисс</th></tr></thead>
-  <tbody id="rows"></tbody></table></div>
-  <div class="add"><input id="new" placeholder="Новое желание: посудомойка, кот, отдельный кабинет…" maxlength="200"><button id="addBtn">Добавить</button></div>
+    <button class="link" id="out" type="button">Выйти</button>
+  </header>
+
+  <section class="filters" id="filters" aria-label="Фильтры"></section>
+
+  <form class="add" id="addForm" autocomplete="off">
+    <input id="new" placeholder="Новое желание…" maxlength="200" enterkeyhint="done" aria-label="Новое желание">
+    <button id="addBtn" type="submit" disabled>Добавить</button>
+  </form>
+
+  <div class="head" aria-hidden="true"><span>Желание</span><span>Он: степень / компромисс</span><span>Она: степень / компромисс</span><span></span></div>
+  <div class="rows" id="rows"></div>
 </div>
 </main>
+<div class="status hide" id="status" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
@@ -79,12 +142,17 @@ const ROLES={"sevkic18@gmail.com":"a","rigova.sesh@gmail.com":"b"};
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const LVL=[["","—"],["must","Очень важно"],["want","Хочу"],["meh","Всё равно"],["no","Против"]];
 const CMP=[["","—"],["yes","Да"],["maybe","Возможно"],["nope","Нет"]];
-let role=null,items=[],fl={lvl:"",cmp:"",diff:false},channel=null;
+const NOFILTER={lvl:"",cmp:"",diff:false};
+let role=null,items=[],fl={...NOFILTER},channel=null,shownFor=null,pending=false,busy=false,statusTimer=null;
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const opts=(L,v)=>L.map(o=>`<option value="${o[0]}"${o[0]===v?" selected":""}>${o[1]}</option>`).join("");
-const sel=(L,id,f,v,who)=>`<select data-id="${id}" data-f="${f}" ${role!==who?"disabled":""} class="c-${v||"none"}">${opts(L,v||"")}</select>`;
+const sel=(L,id,f,v,who,label)=>`<select data-id="${id}" data-f="${f}" aria-label="${label}" ${role!==who?"disabled":""} class="c-${v||"none"}">${opts(L,v||"")}</select>`;
 
+function flash(msg){
+  const s=$("#status");s.textContent=msg;s.classList.remove("hide");
+  clearTimeout(statusTimer);statusTimer=setTimeout(()=>s.classList.add("hide"),4000);
+}
 function pass(it){
   if(fl.lvl&&it.a_lvl!==fl.lvl&&it.b_lvl!==fl.lvl)return false;
   if(fl.cmp&&it.a_cmp!==fl.cmp&&it.b_cmp!==fl.cmp)return false;
@@ -92,23 +160,37 @@ function pass(it){
   return true;
 }
 function renderFilters(){
-  const g=(label,key,L)=>`<div class="grp"><span>${label}</span>${[["","Все"],...L.filter(o=>o[0])].map(o=>`<button class="chip${fl[key]===o[0]?" on":""}" data-fk="${key}" data-fv="${o[0]}">${o[1]}</button>`).join("")}</div>`;
-  $("#filters").innerHTML=g("Степень:","lvl",LVL)+g("Компромисс:","cmp",CMP)+`<div class="grp"><button class="chip${fl.diff?" on":""}" data-diff="1">Только расхождения</button></div>`;
+  const grp=(label,key,L,side="",tail="")=>`<div class="fgroup"><div class="flabel"><span>${label}</span>${side}</div><div class="chips">${
+    [["","Все"],...L.filter(o=>o[0])].map(o=>`<button type="button" class="chip${fl[key]===o[0]?" on":""}" data-fk="${key}" data-fv="${o[0]}">${o[1]}</button>`).join("")
+  }${tail}</div></div>`;
+  const diff=`<i class="sep"></i><button type="button" class="chip diff${fl.diff?" on":""}" data-diff="1">Расхождения</button>`;
+  $("#filters").innerHTML=grp("Степень желания","lvl",LVL,'<span class="count" id="count"></span>')+grp("Компромисс","cmp",CMP,"",diff);
 }
+const rowHtml=it=>`<div class="row" data-row="${it.id}">
+  <textarea class="name" rows="1" maxlength="200" data-id="${it.id}" aria-label="Желание">${esc(it.text)}</textarea>
+  <button class="x" type="button" data-del="${it.id}" aria-label="Удалить">×</button>
+  <div class="who a${role==="a"?" me":""}"><span class="wl">Он</span>${sel(LVL,it.id,"a_lvl",it.a_lvl,"a","Он: степень")}${sel(CMP,it.id,"a_cmp",it.a_cmp,"a","Он: компромисс")}</div>
+  <div class="who b${role==="b"?" me":""}"><span class="wl">Она</span>${sel(LVL,it.id,"b_lvl",it.b_lvl,"b","Она: степень")}${sel(CMP,it.id,"b_cmp",it.b_cmp,"b","Она: компромисс")}</div>
+</div>`;
+function autosize(t){t.style.height="auto";t.style.height=t.scrollHeight+"px";}
 function render(){
+  pending=false;
   const list=items.filter(pass);
-  $("#rows").innerHTML=list.length?list.map(it=>`<tr>
-   <td><input class="t" data-id="${it.id}" value="${esc(it.text)}"></td>
-   <td class="p">${sel(LVL,it.id,"a_lvl",it.a_lvl,"a")}</td><td>${sel(CMP,it.id,"a_cmp",it.a_cmp,"a")}</td>
-   <td class="p">${sel(LVL,it.id,"b_lvl",it.b_lvl,"b")}</td><td>${sel(CMP,it.id,"b_cmp",it.b_cmp,"b")}</td>
-   <td><button class="x" data-del="${it.id}" title="Удалить">×</button></td></tr>`).join("")
-   :`<tr><td colspan="6" class="empty">${items.length?"Ничего не подходит под фильтр":"Пока пусто — добавьте первое желание ниже"}</td></tr>`;
+  $("#rows").innerHTML=list.length?list.map(rowHtml).join("")
+    :`<div class="empty">${items.length?"Ничего не подходит под фильтр":"Пока пусто — добавьте первое желание выше"}</div>`;
+  document.querySelectorAll("textarea.name").forEach(autosize);
+  const c=$("#count");if(c)c.textContent=items.length?`${list.length} из ${items.length}`:"";
 }
-function safeRender(){const a=document.activeElement;if(a&&a.classList&&a.classList.contains("t"))return;render();}
+function safeRender(){
+  const a=document.activeElement;
+  if(a&&a.matches&&a.matches("textarea.name,select")&&$("#rows").contains(a)){pending=true;return;}
+  render();
+}
 
 async function load(){
   const {data,error}=await sb.from("wishes").select("*").order("created_at");
-  if(!error){items=data;safeRender();}
+  if(error){flash("Нет связи с сервером");return;}
+  items=data;safeRender();
 }
 function subscribe(){
   if(channel)return;
@@ -116,13 +198,14 @@ function subscribe(){
 }
 async function showApp(session){
   const email=(session.user.email||"").toLowerCase();
-  role=ROLES[email]||null;
+  if(shownFor===email)return;
+  shownFor=email;role=ROLES[email]||null;
   $("#login").classList.add("hide");$("#app").classList.remove("hide");
-  $("#whoami").textContent=role?`Вы вошли как ${role==="a"?"Он":"Она"}. Своя колонка редактируется, чужая только для просмотра.`:"Ваш email не входит в список.";
+  $("#whoami").textContent=role?`Вы — ${role==="a"?"Он":"Она"}`:"Ваш email не входит в список";
   renderFilters();render();await load();subscribe();
 }
 function showLogin(){
-  role=null;items=[];
+  shownFor=null;role=null;items=[];
   if(channel){sb.removeChannel(channel);channel=null;}
   $("#app").classList.add("hide");$("#login").classList.remove("hide");
 }
@@ -138,25 +221,52 @@ document.addEventListener("click",async e=>{
   const t=e.target.closest("button");if(!t)return;
   if(t.dataset.fk){fl[t.dataset.fk]=t.dataset.fv;renderFilters();render();}
   else if(t.dataset.diff){fl.diff=!fl.diff;renderFilters();render();}
-  else if(t.dataset.del&&confirm("Удалить желание?")){await sb.from("wishes").delete().eq("id",t.dataset.del);load();}
+  else if(t.dataset.del&&confirm("Удалить желание?")){
+    const {error}=await sb.from("wishes").delete().eq("id",t.dataset.del);
+    if(error)flash("Не удалось удалить");
+    load();
+  }
 });
 document.addEventListener("change",async e=>{
   const t=e.target;if(!t.dataset||!t.dataset.id)return;
-  const isText=t.classList.contains("t");
+  const isText=t.classList.contains("name");
   const patch=isText?{text:t.value.trim()}:{[t.dataset.f]:t.value};
+  if(isText&&!patch.text){render();return;}
   const it=items.find(i=>i.id===t.dataset.id);if(it)Object.assign(it,patch);
   if(!isText)render();
-  await sb.from("wishes").update(patch).eq("id",t.dataset.id);
+  const {error}=await sb.from("wishes").update(patch).eq("id",t.dataset.id);
+  if(error){flash("Не сохранилось — попробуйте ещё раз");load();}
 });
-document.addEventListener("focusout",e=>{if(e.target.classList&&e.target.classList.contains("t"))setTimeout(render,50)});
-async function add(){
-  const inp=$("#new"),text=inp.value.trim();if(!text)return;
-  inp.value="";
-  const {error}=await sb.from("wishes").insert({text});
-  if(error)inp.value=text;else load();
-}
-$("#addBtn").onclick=add;
-$("#new").addEventListener("keydown",e=>{if(e.key==="Enter")add()});
+document.addEventListener("focusout",e=>{
+  if(pending&&e.target.matches&&e.target.matches("textarea.name,select"))setTimeout(()=>{if(pending)render()},60);
+});
+document.addEventListener("input",e=>{if(e.target.classList.contains("name"))autosize(e.target);});
+document.addEventListener("keydown",e=>{
+  if(e.target.classList&&e.target.classList.contains("name")&&e.key==="Enter"){e.preventDefault();e.target.blur();}
+});
+window.addEventListener("resize",()=>document.querySelectorAll("textarea.name").forEach(autosize));
+
+/* добавление: кнопка активна только когда есть текст */
+const newInput=$("#new"),addBtn=$("#addBtn");
+const syncAdd=()=>{addBtn.disabled=busy||!newInput.value.trim();};
+newInput.addEventListener("input",syncAdd);
+$("#addForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const text=newInput.value.trim();if(!text||busy)return;
+  busy=true;syncAdd();
+  const {data,error}=await sb.from("wishes").insert({text}).select().single();
+  busy=false;
+  if(error){flash("Не получилось добавить");syncAdd();return;}
+  newInput.value="";syncAdd();
+  fl={...NOFILTER};renderFilters();       // новая строка пустая, фильтр мог бы её скрыть
+  await load();
+  const row=data&&document.querySelector(`[data-row="${data.id}"]`);
+  if(row){
+    row.classList.add("fresh");
+    const calm=matchMedia("(prefers-reduced-motion: reduce)").matches;
+    row.scrollIntoView({block:"center",behavior:calm?"auto":"smooth"});
+  }
+});
 
 sb.auth.onAuthStateChange((_ev,session)=>{session?showApp(session):showLogin();});
 sb.auth.getSession().then(({data})=>{if(!data.session)showLogin();});
