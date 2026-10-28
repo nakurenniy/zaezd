@@ -1,1 +1,165 @@
-привет
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Съезжаемся</title>
+<style>
+:root{--bg:#faf8f5;--surf:#fff;--tx:#1f1d1a;--mut:#7a746b;--line:#e8e3da;--acc:#c2410c;
+--must:#fde2d3;--want:#fdf0c8;--meh:#ece9e3;--no:#dfe3f3;--yes:#d6efdc;--maybe:#fdf0c8;--nope:#f6d5d5;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root{--bg:#171614;--surf:#211f1c;--tx:#f1ede6;--mut:#9b948a;--line:#35322d;--acc:#fb923c;
+--must:#5a2f18;--want:#554714;--meh:#34312c;--no:#2b3252;--yes:#1f4a2c;--maybe:#554714;--nope:#5a2424}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:960px;margin:0 auto;padding:20px 14px 60px}
+h1{font-size:22px;margin:0 0 2px}
+.sub{color:var(--mut);margin:0 0 16px;font-size:13px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.bar{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-bottom:12px}
+.grp{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.grp>span{color:var(--mut);font-size:12px}
+.chip{border:1px solid var(--line);background:var(--surf);color:var(--tx);border-radius:999px;padding:5px 11px;font:inherit;font-size:13px;cursor:pointer}
+.chip.on{background:var(--tx);color:var(--bg);border-color:var(--tx)}
+.wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surf)}
+table{border-collapse:collapse;width:100%;min-width:700px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{font-size:12px;color:var(--mut);font-weight:600;background:var(--bg)}
+th.g{text-align:center;border-left:1px solid var(--line)}
+td.p{border-left:1px solid var(--line)}
+tr:last-child td{border-bottom:0}
+input.t{width:100%;border:0;background:transparent;color:var(--tx);font:inherit;padding:4px 0;outline:none}
+input.t:focus{border-bottom:1px solid var(--acc)}
+select{width:100%;font:inherit;font-size:13px;color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:5px 6px;background:var(--surf)}
+select:disabled{opacity:.9;appearance:none;-webkit-appearance:none;border-color:transparent;text-align:center}
+select.c-must{background:var(--must)}select.c-want{background:var(--want)}select.c-meh{background:var(--meh)}select.c-no{background:var(--no)}
+select.c-yes{background:var(--yes)}select.c-maybe{background:var(--maybe)}select.c-nope{background:var(--nope)}
+.x{border:0;background:none;color:var(--mut);cursor:pointer;font-size:18px;padding:0 4px}
+.add{display:flex;gap:8px;margin-top:12px}
+.add input,.login input{flex:1;border:1px solid var(--line);background:var(--surf);color:var(--tx);border-radius:10px;padding:10px 12px;font:inherit;width:100%}
+.add button,.login button{border:0;background:var(--acc);color:#fff;border-radius:10px;padding:10px 18px;font:inherit;font-weight:600;cursor:pointer}
+.empty{padding:28px;text-align:center;color:var(--mut)}
+.login{max-width:340px;margin:12vh auto 0;display:flex;flex-direction:column;gap:10px}
+.err{color:#dc2626;font-size:13px;min-height:18px}
+.hide{display:none!important}
+.link{background:none;border:0;color:var(--mut);font:inherit;font-size:13px;cursor:pointer;text-decoration:underline;padding:0}
+</style>
+</head>
+<body>
+<main>
+<form id="login" class="login hide">
+  <h1>Съезжаемся 🏠</h1>
+  <p class="sub">Вход только для двоих.</p>
+  <input id="em" type="email" placeholder="Email" autocomplete="username" required>
+  <input id="pw" type="password" placeholder="Пароль" autocomplete="current-password" required>
+  <div class="err" id="err"></div>
+  <button type="submit">Войти</button>
+</form>
+
+<div id="app" class="hide">
+  <div class="top">
+    <div><h1>Съезжаемся 🏠</h1><p class="sub" id="whoami"></p></div>
+    <button class="link" id="out">Выйти</button>
+  </div>
+  <div class="bar" id="filters"></div>
+  <div class="wrap"><table>
+  <thead><tr><th rowspan="2">Желание</th><th class="g" colspan="2">Он</th><th class="g" colspan="2">Она</th><th rowspan="2"></th></tr>
+  <tr><th class="g">Степень</th><th>Компромисс</th><th class="g">Степень</th><th>Компромисс</th></tr></thead>
+  <tbody id="rows"></tbody></table></div>
+  <div class="add"><input id="new" placeholder="Новое желание: посудомойка, кот, отдельный кабинет…" maxlength="200"><button id="addBtn">Добавить</button></div>
+</div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+const SUPABASE_URL="https://otjkckdqtrpocvzmkwsj.supabase.co";
+const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90amtja2RxdHJwb2N2em1rd3NqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyMDg1NzgsImV4cCI6MjEwODc4NDU3OH0.kYj5ED1xPPmFe3QXls-05OnDJGiO4VjRJQo6BsT7DPI";
+const ROLES={"sevkic18@gmail.com":"a","rigova.sesh@gmail.com":"b"};
+
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const LVL=[["","—"],["must","Очень важно"],["want","Хочу"],["meh","Всё равно"],["no","Против"]];
+const CMP=[["","—"],["yes","Да"],["maybe","Возможно"],["nope","Нет"]];
+let role=null,items=[],fl={lvl:"",cmp:"",diff:false},channel=null;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const opts=(L,v)=>L.map(o=>`<option value="${o[0]}"${o[0]===v?" selected":""}>${o[1]}</option>`).join("");
+const sel=(L,id,f,v,who)=>`<select data-id="${id}" data-f="${f}" ${role!==who?"disabled":""} class="c-${v||"none"}">${opts(L,v||"")}</select>`;
+
+function pass(it){
+  if(fl.lvl&&it.a_lvl!==fl.lvl&&it.b_lvl!==fl.lvl)return false;
+  if(fl.cmp&&it.a_cmp!==fl.cmp&&it.b_cmp!==fl.cmp)return false;
+  if(fl.diff&&!(it.a_lvl&&it.b_lvl&&it.a_lvl!==it.b_lvl))return false;
+  return true;
+}
+function renderFilters(){
+  const g=(label,key,L)=>`<div class="grp"><span>${label}</span>${[["","Все"],...L.filter(o=>o[0])].map(o=>`<button class="chip${fl[key]===o[0]?" on":""}" data-fk="${key}" data-fv="${o[0]}">${o[1]}</button>`).join("")}</div>`;
+  $("#filters").innerHTML=g("Степень:","lvl",LVL)+g("Компромисс:","cmp",CMP)+`<div class="grp"><button class="chip${fl.diff?" on":""}" data-diff="1">Только расхождения</button></div>`;
+}
+function render(){
+  const list=items.filter(pass);
+  $("#rows").innerHTML=list.length?list.map(it=>`<tr>
+   <td><input class="t" data-id="${it.id}" value="${esc(it.text)}"></td>
+   <td class="p">${sel(LVL,it.id,"a_lvl",it.a_lvl,"a")}</td><td>${sel(CMP,it.id,"a_cmp",it.a_cmp,"a")}</td>
+   <td class="p">${sel(LVL,it.id,"b_lvl",it.b_lvl,"b")}</td><td>${sel(CMP,it.id,"b_cmp",it.b_cmp,"b")}</td>
+   <td><button class="x" data-del="${it.id}" title="Удалить">×</button></td></tr>`).join("")
+   :`<tr><td colspan="6" class="empty">${items.length?"Ничего не подходит под фильтр":"Пока пусто — добавьте первое желание ниже"}</td></tr>`;
+}
+function safeRender(){const a=document.activeElement;if(a&&a.classList&&a.classList.contains("t"))return;render();}
+
+async function load(){
+  const {data,error}=await sb.from("wishes").select("*").order("created_at");
+  if(!error){items=data;safeRender();}
+}
+function subscribe(){
+  if(channel)return;
+  channel=sb.channel("wishes-live").on("postgres_changes",{event:"*",schema:"public",table:"wishes"},load).subscribe();
+}
+async function showApp(session){
+  const email=(session.user.email||"").toLowerCase();
+  role=ROLES[email]||null;
+  $("#login").classList.add("hide");$("#app").classList.remove("hide");
+  $("#whoami").textContent=role?`Вы вошли как ${role==="a"?"Он":"Она"}. Своя колонка редактируется, чужая только для просмотра.`:"Ваш email не входит в список.";
+  renderFilters();render();await load();subscribe();
+}
+function showLogin(){
+  role=null;items=[];
+  if(channel){sb.removeChannel(channel);channel=null;}
+  $("#app").classList.add("hide");$("#login").classList.remove("hide");
+}
+
+$("#login").addEventListener("submit",async e=>{
+  e.preventDefault();$("#err").textContent="";
+  const {error}=await sb.auth.signInWithPassword({email:$("#em").value.trim(),password:$("#pw").value});
+  if(error)$("#err").textContent="Не получилось войти: проверьте email и пароль.";
+});
+$("#out").onclick=()=>sb.auth.signOut();
+
+document.addEventListener("click",async e=>{
+  const t=e.target.closest("button");if(!t)return;
+  if(t.dataset.fk){fl[t.dataset.fk]=t.dataset.fv;renderFilters();render();}
+  else if(t.dataset.diff){fl.diff=!fl.diff;renderFilters();render();}
+  else if(t.dataset.del&&confirm("Удалить желание?")){await sb.from("wishes").delete().eq("id",t.dataset.del);load();}
+});
+document.addEventListener("change",async e=>{
+  const t=e.target;if(!t.dataset||!t.dataset.id)return;
+  const isText=t.classList.contains("t");
+  const patch=isText?{text:t.value.trim()}:{[t.dataset.f]:t.value};
+  const it=items.find(i=>i.id===t.dataset.id);if(it)Object.assign(it,patch);
+  if(!isText)render();
+  await sb.from("wishes").update(patch).eq("id",t.dataset.id);
+});
+document.addEventListener("focusout",e=>{if(e.target.classList&&e.target.classList.contains("t"))setTimeout(render,50)});
+async function add(){
+  const inp=$("#new"),text=inp.value.trim();if(!text)return;
+  inp.value="";
+  const {error}=await sb.from("wishes").insert({text});
+  if(error)inp.value=text;else load();
+}
+$("#addBtn").onclick=add;
+$("#new").addEventListener("keydown",e=>{if(e.key==="Enter")add()});
+
+sb.auth.onAuthStateChange((_ev,session)=>{session?showApp(session):showLogin();});
+sb.auth.getSession().then(({data})=>{if(!data.session)showLogin();});
+</script>
+</body>
+</html>
