@@ -11,12 +11,12 @@
 <title>Съезжаемся</title>
 <style>
 :root{--bg:#faf8f5;--surf:#fff;--tx:#1f1d1a;--mut:#7a746b;--line:#e8e3da;--acc:#c2410c;--on-acc:#fff;
---must:#fde2d3;--want:#fdf0c8;--meh:#ece9e3;--no:#dfe3f3;--yes:#d6efdc;--maybe:#fdf0c8;--nope:#f6d5d5;
---a-bg:#e6eefb;--a-line:#bfd2f0;--a-tx:#2557b5;--b-bg:#f7e6eb;--b-line:#e3bcc7;--b-tx:#8a1c3d;
+--must:#fde2d3;--want:#fdf0c8;--meh:#ece9e3;--no:#dfe3f3;--yes:#c3ebd0;--maybe:#fdf0c8;--nope:#f6d5d5;
+--a-bg:#dce9df;--a-line:#b4cdba;--a-tx:#1f6b3a;--b-bg:#f7e6eb;--b-line:#e3bcc7;--b-tx:#8a1c3d;
 --chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%237a746b' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
 @media (prefers-color-scheme:dark){:root{--bg:#171614;--surf:#211f1c;--tx:#f1ede6;--mut:#9b948a;--line:#35322d;--acc:#fb923c;--on-acc:#1f1d1a;
 --must:#5a2f18;--want:#554714;--meh:#34312c;--no:#2b3252;--yes:#1f4a2c;--maybe:#554714;--nope:#5a2424;
---a-bg:#182438;--a-line:#2b4166;--a-tx:#8db3f2;--b-bg:#2c1820;--b-line:#4f2a37;--b-tx:#e58ca5}}
+--a-bg:#17261c;--a-line:#2a4733;--a-tx:#86d1a0;--b-bg:#2c1820;--b-line:#4f2a37;--b-tx:#e58ca5}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,"SF Pro Text","Segoe UI",Roboto,sans-serif;touch-action:manipulation}
@@ -30,17 +30,17 @@ button{font:inherit;color:inherit}
 .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
 .link{background:none;border:0;color:var(--mut);font-size:14px;cursor:pointer;text-decoration:underline;padding:8px 0 8px 8px;min-height:36px}
 
-/* фильтры: каждая группа в одну строку, при нехватке места — горизонтальный скролл, без переноса */
-.filters{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
-.flabel{display:flex;justify-content:space-between;align-items:baseline;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--mut);margin:0 2px 4px}
-.count{font-size:12px;font-weight:500;letter-spacing:0;text-transform:none;white-space:nowrap}
-.chips{display:flex;flex-wrap:nowrap;gap:3px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;
- margin:0 calc(-1 * max(14px,env(safe-area-inset-left)));padding:0 max(14px,env(safe-area-inset-left))}
-.chips::-webkit-scrollbar{display:none}
-.chip{flex:1 0 auto;white-space:nowrap;height:36px;border:1px solid var(--line);background:var(--surf);color:var(--tx);border-radius:999px;padding:0 8px;font-size:13px;cursor:pointer}
+/* фильтры: два селекта в одну строку; выбранный фильтр подсвечивается */
+.filters{margin-bottom:12px}
+.fsels{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fsel{display:block;min-width:0}
+.flabel{display:block;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--mut);margin:0 2px 4px;white-space:nowrap}
+.fsel select.on{background-color:var(--tx);color:var(--bg);border-color:var(--tx)}
+.fsel select.on option{background:var(--surf);color:var(--tx)}
+.fmeta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px}
+.count{font-size:13px;color:var(--mut);white-space:nowrap}
+.chip{height:32px;border:1px solid var(--line);background:var(--surf);color:var(--tx);border-radius:999px;padding:0 12px;font-size:13px;cursor:pointer;white-space:nowrap}
 .chip.on{background:var(--tx);color:var(--bg);border-color:var(--tx)}
-.chip.diff{flex:none}
-.sep{flex:none;align-self:center;width:1px;height:20px;background:var(--line);margin:0 3px}
 
 /* добавление */
 .add{display:flex;gap:8px;margin-bottom:14px}
@@ -117,9 +117,7 @@ select:disabled.c-none{color:var(--mut);-webkit-text-fill-color:var(--mut)}
  .who.a{grid-column:2}.who.b{grid-column:3}
  .wl,.cols{display:none}
  .x{grid-column:4}
- .chips{margin:0;padding:0;flex-wrap:wrap}
- .chip{flex:none}
- .filters{flex-direction:row;flex-wrap:wrap;gap:12px 24px;align-items:flex-end}
+ .fsels{max-width:520px}
 }
 </style>
 </head>
@@ -180,11 +178,11 @@ function pass(it){
   return true;
 }
 function renderFilters(){
-  const grp=(label,key,L,side="",tail="")=>`<div class="fgroup"><div class="flabel"><span>${label}</span>${side}</div><div class="chips">${
-    [["","Все"],...L.filter(o=>o[0])].map(o=>`<button type="button" class="chip${fl[key]===o[0]?" on":""}" data-fk="${key}" data-fv="${o[0]}">${o[1]}</button>`).join("")
-  }${tail}</div></div>`;
-  const diff=`<i class="sep"></i><button type="button" class="chip diff${fl.diff?" on":""}" data-diff="1">Расхождения</button>`;
-  $("#filters").innerHTML=grp("Степень желания","lvl",LVL,'<span class="count" id="count"></span>')+grp("Компромисс","cmp",CMP,"",diff);
+  const fsel=(label,key,L)=>`<label class="fsel"><span class="flabel">${label}</span><select data-fk="${key}" class="${fl[key]?"on":""}">${
+    [["","Все"],...L.filter(o=>o[0])].map(o=>`<option value="${o[0]}"${fl[key]===o[0]?" selected":""}>${o[1]}</option>`).join("")
+  }</select></label>`;
+  $("#filters").innerHTML=`<div class="fsels">${fsel("Степень","lvl",LVL)}${fsel("Компромисс","cmp",CMP)}</div>
+  <div class="fmeta"><button type="button" class="chip${fl.diff?" on":""}" data-diff="1">Расхождения</button><span class="count" id="count"></span></div>`;
 }
 const roleOf=e=>ROLES[(e||"").toLowerCase()];
 /* пока в базе нет колонки author_email — работаем как раньше (все могут всё) */
@@ -246,8 +244,7 @@ $("#out").onclick=()=>sb.auth.signOut();
 
 document.addEventListener("click",async e=>{
   const t=e.target.closest("button");if(!t)return;
-  if(t.dataset.fk){fl[t.dataset.fk]=t.dataset.fv;renderFilters();render();}
-  else if(t.dataset.diff){fl.diff=!fl.diff;renderFilters();render();}
+  if(t.dataset.diff){fl.diff=!fl.diff;renderFilters();render();}
   else if(t.dataset.del&&confirm("Удалить желание?")){
     const {error}=await sb.from("wishes").delete().eq("id",t.dataset.del);
     if(error)flash("Не удалось удалить");
@@ -255,7 +252,9 @@ document.addEventListener("click",async e=>{
   }
 });
 document.addEventListener("change",async e=>{
-  const t=e.target;if(!t.dataset||!t.dataset.id)return;
+  const t=e.target;
+  if(t.dataset&&t.dataset.fk){fl[t.dataset.fk]=t.value;renderFilters();render();return;}
+  if(!t.dataset||!t.dataset.id)return;
   const isText=t.classList.contains("name");
   const patch=isText?{text:t.value.trim()}:{[t.dataset.f]:t.value};
   if(isText&&!patch.text){render();return;}
