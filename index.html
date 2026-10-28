@@ -59,6 +59,8 @@ button{font:inherit;color:inherit}
 .name:focus{outline:none;background:var(--bg)}
 .x{grid-column:2;grid-row:1;width:44px;height:44px;border:0;background:none;color:var(--mut);font-size:24px;line-height:1;cursor:pointer;border-radius:8px}
 .who{grid-column:1/-1;display:grid;grid-template-columns:34px 1fr 1fr;gap:6px;align-items:center;padding-right:4px}
+.cols{grid-column:1/-1;display:grid;grid-template-columns:34px 1fr 1fr;gap:6px;padding-right:4px;margin-bottom:-2px;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--mut)}
+.cols span{padding-left:2px}
 .wl{font-size:12px;font-weight:600;color:var(--mut)}
 .who.me .wl{color:var(--acc)}
 select{appearance:none;-webkit-appearance:none;width:100%;min-width:0;height:44px;font:inherit;font-size:16px;color:var(--tx);
@@ -95,7 +97,7 @@ select:disabled.c-none{color:var(--mut);-webkit-text-fill-color:var(--mut)}
  .name{grid-column:1;grid-row:1}
  .who{grid-row:1;grid-template-columns:1fr 1fr;padding-right:0}
  .who.a{grid-column:2}.who.b{grid-column:3}
- .wl{display:none}
+ .wl,.cols{display:none}
  .x{grid-column:4}
  .chips{margin:0;padding:0;flex-wrap:wrap}
  .chip{flex:none}
@@ -169,6 +171,7 @@ function renderFilters(){
 const rowHtml=it=>`<div class="row" data-row="${it.id}">
   <textarea class="name" rows="1" maxlength="200" data-id="${it.id}" aria-label="Желание">${esc(it.text)}</textarea>
   <button class="x" type="button" data-del="${it.id}" aria-label="Удалить">×</button>
+  <div class="cols" aria-hidden="true"><i></i><span>Степень</span><span>Компромисс</span></div>
   <div class="who a${role==="a"?" me":""}"><span class="wl">Он</span>${sel(LVL,it.id,"a_lvl",it.a_lvl,"a","Он: степень")}${sel(CMP,it.id,"a_cmp",it.a_cmp,"a","Он: компромисс")}</div>
   <div class="who b${role==="b"?" me":""}"><span class="wl">Она</span>${sel(LVL,it.id,"b_lvl",it.b_lvl,"b","Она: степень")}${sel(CMP,it.id,"b_cmp",it.b_cmp,"b","Она: компромисс")}</div>
 </div>`;
