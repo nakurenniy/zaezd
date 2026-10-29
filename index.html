@@ -19,6 +19,7 @@
 --a-bg:#dce9df;--a-line:#b4cdba;--a-tx:#1f6b3a;--a-hi:#a6dbb6;
 --b-bg:#f7e6eb;--b-line:#e3bcc7;--b-tx:#8a1c3d;--b-hi:#f2b2c4;--n-hi:#fbd9bf;
 color-scheme:light;
+--ease-out:cubic-bezier(0.23,1,0.32,1);--ease-in-out:cubic-bezier(0.77,0,0.175,1);--ease-drawer:cubic-bezier(0.32,0.72,0,1);
 --chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%237a746b' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171614;--surf:#211f1c;--tx:#f1ede6;--mut:#9b948a;--line:#35322d;--acc:#fb923c;--on-acc:#1f1d1a;
 --must:#5a2f18;--want:#554714;--meh:#34312c;--no:#2b3252;--yes:#1f4a2c;--maybe:#554714;--nope:#5a2424;
@@ -42,9 +43,17 @@ button{font:inherit;color:inherit}
 .tools{display:flex;align-items:center;margin:-6px -8px 0 0}
 .ibtn{position:relative;width:44px;height:44px;border:0;background:none;color:var(--tx);display:grid;place-items:center;border-radius:12px;cursor:pointer}
 .ibtn .badge{position:absolute;top:4px;right:2px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--acc);color:var(--on-acc);font-size:11px;font-weight:800;line-height:18px;text-align:center}
-.tbtn .sun{display:none}
-.tbtn[data-eff="dark"] .sun{display:block}
-.tbtn[data-eff="dark"] .moon{display:none}
+.tbtn svg{grid-area:1/1;transition:opacity 200ms var(--ease-out),transform 300ms var(--ease-out)}
+.tbtn .sun{opacity:0;transform:rotate(-70deg) scale(.6)}
+.tbtn[data-eff="dark"] .sun{opacity:1;transform:none}
+.tbtn[data-eff="dark"] .moon{opacity:0;transform:rotate(70deg) scale(.6)}
+/* смена темы: цвета плавно перетекают, пока висит класс (≈0,3 с) */
+:root.theming *,:root.theming *::before,:root.theming *::after{transition:background-color 260ms ease,border-color 260ms ease,color 260ms ease,fill 260ms ease!important}
+
+/* нажатие: интерфейс «слышит» палец */
+.ibtn,.fbtn,.ghost,.primary,.login button,.x,.sheet-x{transition:transform 160ms var(--ease-out)}
+.ibtn:active,.fbtn:active,.ghost:not(:disabled):active,.primary:not(:disabled):active,.login button:active,.x:active,.sheet-x:active,.add button:not(:disabled):active{transform:scale(.97)}
+.textbtn{transition:opacity 150ms ease}.textbtn:active{opacity:.6}
 
 /* статистика */
 .stats{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:8px;margin-bottom:10px}
@@ -82,7 +91,7 @@ button{font:inherit;color:inherit}
 .add{display:flex;flex:1;min-width:0;gap:8px;margin:0}
 .add input{flex:1;min-width:0;height:48px;border:1px solid var(--line);background:var(--surf);color:var(--tx);border-radius:12px;padding:0 14px;font:inherit;font-size:16px}
 .add input:focus{outline:2px solid var(--acc);outline-offset:-1px;border-color:transparent}
-.add button{flex:none;display:grid;place-items:center;width:48px;height:48px;border:0;background:var(--acc);color:var(--on-acc);border-radius:12px;padding:0;font-weight:600;font-size:16px;cursor:pointer;transition:opacity .15s}
+.add button{flex:none;display:grid;place-items:center;width:48px;height:48px;border:0;background:var(--acc);color:var(--on-acc);border-radius:12px;padding:0;font-weight:600;font-size:16px;cursor:pointer;transition:transform 160ms var(--ease-out),opacity 150ms ease}
 .add button .t{display:none}
 .add button:disabled{opacity:.35;cursor:not-allowed}
 
@@ -95,9 +104,13 @@ button{font:inherit;color:inherit}
 /* новая / выбранная карточка: цвет становится ярче и плавно возвращается */
 .row.fresh{animation:fresh 2.4s ease-out}
 @keyframes fresh{0%,35%{background-color:var(--hi)}}
+.row{--rg:10px}
+.row.leaving{opacity:0;transform:scale(.97);height:0!important;min-height:0;padding-top:0;padding-bottom:0;margin-bottom:calc(var(--rg)*-1);border-width:0;overflow:hidden;pointer-events:none;
+ transition:opacity 160ms ease,transform 200ms var(--ease-out),height 220ms var(--ease-out) 40ms,padding 220ms var(--ease-out) 40ms,margin 220ms var(--ease-out) 40ms,border-width 0s 260ms}
 @media (prefers-reduced-motion:reduce){.row.fresh{animation:none;background-color:var(--hi)}}
 .name{grid-column:1;width:100%;min-width:0;min-height:44px;border:0;background:transparent;color:var(--tx);font:inherit;font-size:17px;font-weight:600;line-height:1.3;
  padding:10px 4px;border-radius:8px;resize:none;overflow:hidden;display:block}
+.name{transition:background-color 120ms ease}
 .name:focus{outline:none;background:var(--bg)}
 .name[readonly]:focus{background:transparent}
 .nm{grid-column:1;min-width:0}
@@ -118,7 +131,7 @@ button{font:inherit;color:inherit}
 .who:not(.me) .wl{opacity:.6}
 .who.me .wl{font-weight:800}
 select{appearance:none;-webkit-appearance:none;width:100%;min-width:0;height:44px;font:inherit;font-size:16px;color:var(--tx);
- border:1px solid var(--line);border-radius:10px;padding:0 28px 0 10px;background-color:var(--surf);background-image:var(--chev);background-repeat:no-repeat;background-position:right 10px center;text-overflow:ellipsis}
+ border:1px solid var(--line);border-radius:10px;padding:0 28px 0 10px;background-color:var(--surf);background-image:var(--chev);background-repeat:no-repeat;background-position:right 10px center;text-overflow:ellipsis;transition:background-color 200ms ease,color 200ms ease}
 select:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
 select.c-none{color:var(--mut)}
 select.c-must{background-color:var(--must)}select.c-want{background-color:var(--want)}select.c-meh{background-color:var(--meh)}select.c-no{background-color:var(--no)}
@@ -129,8 +142,12 @@ select:disabled.c-none{color:var(--mut);-webkit-text-fill-color:var(--mut)}
 
 /* шторки: уведомления и фильтры */
 .sheet{position:fixed;inset:0;z-index:20;display:flex;align-items:flex-end;justify-content:center}
-.sheet-bg{position:absolute;inset:0;background:rgba(0,0,0,.42)}
-.sheet-panel{position:relative;width:100%;max-width:560px;max-height:80vh;max-height:80dvh;overflow:auto;background:var(--surf);border-radius:18px 18px 0 0;padding:14px 16px max(16px,env(safe-area-inset-bottom))}
+.sheet-bg{position:absolute;inset:0;background:rgba(0,0,0,.42);opacity:0;transition:opacity 220ms ease}
+.sheet-panel{position:relative;width:100%;max-width:560px;max-height:80vh;max-height:80dvh;overflow:auto;background:var(--surf);border-radius:18px 18px 0 0;padding:14px 16px max(16px,env(safe-area-inset-bottom));transform:translateY(100%);transition:transform 420ms var(--ease-drawer)}
+.sheet.open .sheet-bg{opacity:1}
+.sheet.open .sheet-panel{transform:none}
+.sheet.closing .sheet-bg{transition-duration:200ms}
+.sheet.closing .sheet-panel{transition-duration:240ms}
 .sheet-head{display:flex;justify-content:space-between;align-items:center}
 .sheet-head h2{margin:0;font-size:19px}
 .sheet-x{width:44px;height:44px;margin-right:-10px;border:0;background:none;color:var(--mut);font-size:26px;cursor:pointer}
@@ -154,14 +171,25 @@ select:disabled.c-none{color:var(--mut);-webkit-text-fill-color:var(--mut)}
 .err{color:#dc2626;font-size:13px;min-height:18px}
 
 /* уведомление об ошибке */
-.status{position:fixed;left:50%;bottom:max(16px,env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;max-width:calc(100vw - 32px);z-index:30}
+.status{position:fixed;left:50%;bottom:max(16px,env(safe-area-inset-bottom));transform:translate(-50%,16px);opacity:0;visibility:hidden;transition:opacity 300ms ease,transform 300ms ease,visibility 0s linear 300ms;background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;max-width:calc(100vw - 32px);z-index:30}
+.status.on{opacity:1;transform:translate(-50%,0);visibility:visible;transition-delay:0s}
 
+@media (prefers-reduced-motion:reduce){
+ .ibtn:active,.fbtn:active,.ghost:active,.primary:active,.login button:active,.x:active,.sheet-x:active,.add button:active{transform:none}
+ .tbtn svg,.tbtn .sun,.tbtn .moon{transform:none!important}
+ .sheet-panel,.sheet.open .sheet-panel{transform:none!important;transition:opacity 150ms ease!important}
+ .sheet:not(.open) .sheet-panel{opacity:0}.sheet.open .sheet-panel{opacity:1}
+ .status,.status.on{transform:translateX(-50%)}
+ .row.leaving{transform:none}
+}
 /* широкие экраны: строки таблицы */
 @media (min-width:760px){
  main{padding-top:24px}
  .fbtn{width:auto;padding:0 18px}.fbtn .t{display:inline}
  .add button{width:auto;padding:0 20px}.add button svg{display:none}.add button .t{display:inline}
- .sheet{align-items:center}.sheet-panel{border-radius:18px}
+ .sheet{align-items:center}.sheet-panel{border-radius:18px;opacity:0;transform:scale(.96) translateY(8px);transition:transform 220ms var(--ease-out),opacity 180ms var(--ease-out)}
+ .sheet.open .sheet-panel{opacity:1;transform:none}
+ .sheet.closing .sheet-panel{transition-duration:160ms}
  .stats{max-width:520px}
  select,.name{font-size:14px}
  select{height:36px}
@@ -169,6 +197,7 @@ select:disabled.c-none{color:var(--mut);-webkit-text-fill-color:var(--mut)}
  .x{width:36px;height:36px}
  .head,.row{display:grid;grid-template-columns:minmax(180px,1fr) 300px 300px 36px;gap:0 12px;align-items:center}
  .head{padding:0 12px;font-size:12px;font-weight:600;color:var(--mut);margin-bottom:6px}
+ .row{--rg:0px}
  .rows{gap:0;border:1px solid var(--line);border-radius:12px;background:var(--surf);overflow:hidden}
  .row{border:0;border-bottom:1px solid var(--line);border-radius:0;padding:6px 12px}
  .row:last-child{border-bottom:0}
@@ -252,7 +281,7 @@ select:disabled.c-none{color:var(--mut);-webkit-text-fill-color:var(--mut)}
     </div>
   </div>
 </div>
-<div class="status hide" id="status" role="status"></div>
+<div class="status" id="status" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
@@ -271,6 +300,18 @@ const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&g
 const opts=(L,v)=>L.map(o=>`<option value="${o[0]}"${o[0]===v?" selected":""}>${o[1]}</option>`).join("");
 const sel=(L,id,f,v,who,label)=>`<select data-id="${id}" data-f="${f}" aria-label="${label}" ${role!==who?"disabled":""} class="c-${v||"none"}">${opts(L,v||"")}</select>`;
 const calm=()=>matchMedia("(prefers-reduced-motion: reduce)").matches;
+const EASE="cubic-bezier(0.23, 1, 0.32, 1)";
+/* появление: сдвиг + прозрачность, только transform и opacity */
+function enter(el,{y=8,delay=0,d=280}={}){
+  if(!el||calm()||!el.animate)return;
+  el.animate([{opacity:0,transform:`translateY(${y}px)`},{opacity:1,transform:"none"}],{duration:d,delay,easing:EASE,fill:"backwards"});
+}
+/* бейдж подпрыгивает, когда число выросло */
+function pop(el){
+  if(!el||calm()||!el.animate)return;
+  el.animate([{transform:"scale(.6)",opacity:0},{transform:"scale(1)",opacity:1}],{duration:240,easing:EASE});
+}
+let firstLoad=true,lastBell=null,lastFilt=null,leaveUntil=0;
 
 /* тема: по умолчанию как в системе, переключатель запоминается на устройстве */
 const mq=matchMedia("(prefers-color-scheme: dark)");
@@ -285,7 +326,9 @@ function syncTheme(){
 }
 $("#theme").onclick=()=>{
   const n=effTheme()==="dark"?"light":"dark";
-  document.documentElement.dataset.theme=n;
+  const root=document.documentElement;
+  if(!calm()){root.classList.add("theming");setTimeout(()=>root.classList.remove("theming"),320);}
+  root.dataset.theme=n;
   try{localStorage.setItem("theme",n)}catch(_){}
   syncTheme();
 };
@@ -293,8 +336,8 @@ if(mq.addEventListener)mq.addEventListener("change",()=>{if(!document.documentEl
 syncTheme();
 
 function flash(msg){
-  const s=$("#status");s.textContent=msg;s.classList.remove("hide");
-  clearTimeout(statusTimer);statusTimer=setTimeout(()=>s.classList.add("hide"),4000);
+  const s=$("#status");s.textContent=msg;s.classList.add("on");
+  clearTimeout(statusTimer);statusTimer=setTimeout(()=>s.classList.remove("on"),4000);
 }
 function pass(it){
   if(fl.author){
@@ -323,6 +366,7 @@ function syncFilters(){
   document.querySelectorAll("#fbody select").forEach(s=>s.classList.toggle("on",!!fl[s.dataset.fk]));
   const n=nFilters(),b=$("#fcount");
   b.textContent=String(n);b.classList.toggle("hide",!n);
+  if(lastFilt!==null&&n>lastFilt)pop(b);lastFilt=n;
   $("#fbtn").setAttribute("aria-label",n?`Фильтры: ${n}`:"Фильтры");
   $("#freset").disabled=!n;
 }
@@ -364,6 +408,7 @@ function render(){
   $("#fshow").textContent=n?`Показать ${list.length} из ${items.length}`:"Готово";
 }
 function safeRender(){
+  if(Date.now()<leaveUntil){setTimeout(safeRender,leaveUntil-Date.now()+20);return;}   // не перебивать схлопывание
   const a=document.activeElement;
   if(a&&a.matches&&a.matches("textarea.name,select")&&$("#rows").contains(a)){pending=true;return;}
   render();
@@ -384,6 +429,7 @@ async function load(){
   if(error){flash("Нет связи с сервером");return;}
   items=data.slice().sort((x,y)=>ts(y.created_at)-ts(x.created_at));   // новые сверху
   safeRender();
+  if(firstLoad){firstLoad=false;[...document.querySelectorAll(".row")].slice(0,8).forEach((el,i)=>enter(el,{delay:i*45,d:300}));}
 }
 function subscribe(){
   if(channel)return;
@@ -398,7 +444,7 @@ async function showApp(session){
   renderFilters();render();await load();subscribe();
 }
 function showLogin(){
-  shownFor=null;myEmail="";role=null;items=[];closeSheet();
+  shownFor=null;myEmail="";role=null;items=[];firstLoad=true;lastBell=null;lastFilt=null;closeSheet();
   if(channel){sb.removeChannel(channel);channel=null;}
   $("#app").classList.add("hide");$("#login").classList.remove("hide");
 }
@@ -412,8 +458,13 @@ $("#login").addEventListener("submit",async e=>{
 document.addEventListener("click",async e=>{
   const t=e.target.closest("button");if(!t)return;
   if(t.dataset.del&&confirm("Удалить желание?")){
+    const row=t.closest(".row");
+    if(row&&!calm()){row.style.height=row.offsetHeight+"px";void row.offsetHeight;row.classList.add("leaving");leaveUntil=Date.now()+300;}
+    const t0=Date.now();
     const {error}=await sb.from("wishes").delete().eq("id",t.dataset.del);
     if(error)flash("Не удалось удалить");
+    const left=280-(Date.now()-t0);                       // дать карточке договорить анимацию
+    if(row&&!error&&!calm()&&left>0)await new Promise(res=>setTimeout(res,left));
     load();
   }
 });
@@ -426,7 +477,12 @@ document.addEventListener("change",async e=>{
   const patch=isText?{text:t.value.trim()}:{[t.dataset.f]:t.value};
   if(isText&&!patch.text){render();return;}
   const it=items.find(i=>i.id===t.dataset.id);if(it)Object.assign(it,patch);
-  if(!isText)render();
+  if(!isText){
+    const oldCls=t.className,key=`[data-id="${t.dataset.id}"][data-f="${t.dataset.f}"]`;
+    render();
+    const ns=document.querySelector(key);
+    if(ns&&!calm()&&ns.className!==oldCls){const nc=ns.className;ns.style.transition="none";ns.className=oldCls;void ns.offsetWidth;ns.style.transition="";ns.className=nc;}
+  }
   const {error}=await sb.from("wishes").update(patch).eq("id",t.dataset.id);
   if(error){flash("Не сохранилось — попробуйте ещё раз");load();}
 });
@@ -454,7 +510,7 @@ $("#addForm").addEventListener("submit",async e=>{
   fl={...NOFILTER};renderFilters();       // новая строка пустая, фильтр мог бы её скрыть
   flashId=data&&data.id;flashAt=Date.now();
   await load();
-  if(data)flashRow(data.id,"nearest");
+  if(data){enter(document.querySelector(`[data-row="${data.id}"]`),{y:-10,d:260});flashRow(data.id,"nearest");}
 });
 
 /* шторки: уведомления и фильтры */
@@ -462,12 +518,15 @@ let lastFocus=null;
 function openSheet(id){
   lastFocus=document.activeElement;
   if(id==="sheet")renderFeed();
-  $("#"+id).classList.remove("hide");document.body.style.overflow="hidden";
+  const el=$("#"+id);clearTimeout(el._t);
+  el.classList.remove("hide","closing");void el.offsetWidth;el.classList.add("open");
+  document.body.style.overflow="hidden";
   $("#"+id+" .sheet-x").focus();
 }
 function closeSheet(){
-  const open=document.querySelectorAll(".sheet:not(.hide)");if(!open.length)return;
-  open.forEach(s=>s.classList.add("hide"));document.body.style.overflow="";
+  const open=document.querySelectorAll(".sheet.open");if(!open.length)return;
+  open.forEach(s=>{s.classList.remove("open");s.classList.add("closing");clearTimeout(s._t);s._t=setTimeout(()=>{s.classList.add("hide");s.classList.remove("closing");},calm()?160:380);});
+  document.body.style.overflow="";
   if(lastFocus&&lastFocus.focus)lastFocus.focus();
 }
 document.querySelectorAll(".sheet").forEach(s=>s.addEventListener("click",e=>{
@@ -523,8 +582,9 @@ function renderFeed(){
 function updateBell(){
   const n=items.filter(markOf).length,b=$("#bellCount");
   b.textContent=n>9?"9+":String(n);b.classList.toggle("hide",!n);
+  if(lastBell!==null&&n>lastBell)pop(b);lastBell=n;
   $("#bell").setAttribute("aria-label",n?`Что нового: ${n}`:"Что нового");
-  if(!$("#sheet").classList.contains("hide"))renderFeed();
+  if($("#sheet").classList.contains("open"))renderFeed();
 }
 function goTo(id){
   closeSheet();
