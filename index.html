@@ -52,12 +52,14 @@ button{font:inherit;color:inherit}
 .stat.sb{background:var(--b-bg);border-color:var(--b-line)}.stat.sb b{color:var(--b-tx)}
 
 /* кнопка фильтров */
-.toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
-.fbtn{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 14px;border:1px solid var(--line);background:var(--surf);color:var(--tx);border-radius:12px;font-size:15px;font-weight:500;cursor:pointer}
-.fbtn.on{background:var(--tx);color:var(--bg);border-color:var(--tx)}
-.fcount{min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--acc);color:var(--on-acc);font-size:12px;font-weight:800;line-height:20px;text-align:center}
-.count{font-size:13px;color:var(--mut);white-space:nowrap}
-.fsels{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.bar{display:flex;gap:8px;margin-bottom:14px}
+.fbtn{position:relative;flex:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;width:48px;height:48px;padding:0;border:0;background:var(--acc);color:var(--on-acc);border-radius:12px;font-size:16px;font-weight:600;cursor:pointer}
+.fbtn .t{display:none}
+.fcount{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--tx);color:var(--bg);border:2px solid var(--bg);box-sizing:content-box;font-size:11px;font-weight:800;line-height:20px;text-align:center}
+.fstate{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:-6px 0 12px;font-size:13px;color:var(--mut)}
+.textbtn{border:0;background:none;color:var(--acc);font-size:14px;font-weight:600;padding:8px 0 8px 12px;cursor:pointer}
+.fsels{display:grid;grid-template-columns:1fr 1fr;gap:12px 8px;margin-top:10px}
+.fsel.full{grid-column:1/-1}
 .fsel{display:block;min-width:0}
 .flabel{display:block;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--mut);margin:0 2px 4px;white-space:nowrap}
 .fsel select.on{background-color:var(--tx);color:var(--bg);border-color:var(--tx)}
@@ -74,10 +76,11 @@ button{font:inherit;color:inherit}
 .ghost:disabled{opacity:.35;cursor:not-allowed}
 
 /* добавление */
-.add{display:flex;gap:8px;margin-bottom:14px}
+.add{display:flex;flex:1;min-width:0;gap:8px;margin:0}
 .add input{flex:1;min-width:0;height:48px;border:1px solid var(--line);background:var(--surf);color:var(--tx);border-radius:12px;padding:0 14px;font:inherit;font-size:16px}
 .add input:focus{outline:2px solid var(--acc);outline-offset:-1px;border-color:transparent}
-.add button{flex:none;height:48px;border:0;background:var(--acc);color:var(--on-acc);border-radius:12px;padding:0 16px;font-weight:600;font-size:16px;cursor:pointer;transition:opacity .15s}
+.add button{flex:none;display:grid;place-items:center;width:48px;height:48px;border:0;background:var(--acc);color:var(--on-acc);border-radius:12px;padding:0;font-weight:600;font-size:16px;cursor:pointer;transition:opacity .15s}
+.add button .t{display:none}
 .add button:disabled{opacity:.35;cursor:not-allowed}
 
 /* список: на телефоне карточки */
@@ -136,7 +139,7 @@ select:disabled.c-none{color:var(--mut);-webkit-text-fill-color:var(--mut)}
 .ftxt{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .feed time{color:var(--mut);font-size:12px;white-space:nowrap;margin-top:2px}
 .w-a{color:var(--a-tx)}.w-b{color:var(--b-tx)}
-.primary{width:100%;height:48px;border:0;border-radius:12px;background:var(--tx);color:var(--bg);font-size:16px;font-weight:600;cursor:pointer}
+.primary{width:100%;height:48px;border:0;border-radius:12px;background:var(--acc);color:var(--on-acc);font-size:16px;font-weight:600;cursor:pointer}
 .primary:disabled{opacity:.35;cursor:not-allowed}
 #readAll{margin-top:12px}
 .fact .primary{flex:1}
@@ -153,6 +156,8 @@ select:disabled.c-none{color:var(--mut);-webkit-text-fill-color:var(--mut)}
 /* широкие экраны: строки таблицы */
 @media (min-width:760px){
  main{padding-top:24px}
+ .fbtn{width:auto;padding:0 18px}.fbtn .t{display:inline}
+ .add button{width:auto;padding:0 20px}.add button svg{display:none}.add button .t{display:inline}
  .sheet{align-items:center}.sheet-panel{border-radius:18px}
  .stats{max-width:520px}
  select,.name{font-size:14px}
@@ -203,18 +208,20 @@ select:disabled.c-none{color:var(--mut);-webkit-text-fill-color:var(--mut)}
 
   <section class="stats" id="stats" aria-label="Статистика"></section>
 
-  <div class="toolbar">
-    <button class="fbtn" id="fbtn" type="button" aria-haspopup="dialog">
+  <div class="bar">
+    <button class="fbtn" id="fbtn" type="button" aria-haspopup="dialog" aria-label="Фильтры">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h9m4 0h3M4 12h3m4 0h9M4 18h11m4 0h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg>
-      <span>Фильтры</span><span class="fcount hide" id="fcount"></span>
+      <span class="t">Фильтры</span><span class="fcount hide" id="fcount"></span>
     </button>
-    <span class="count" id="count"></span>
+    <form class="add" id="addForm" autocomplete="off">
+      <input id="new" placeholder="Новое желание…" maxlength="200" enterkeyhint="done" aria-label="Новое желание">
+      <button id="addBtn" type="submit" disabled aria-label="Добавить">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        <span class="t">Добавить</span>
+      </button>
+    </form>
   </div>
-
-  <form class="add" id="addForm" autocomplete="off">
-    <input id="new" placeholder="Новое желание…" maxlength="200" enterkeyhint="done" aria-label="Новое желание">
-    <button id="addBtn" type="submit" disabled>Добавить</button>
-  </form>
+  <div class="fstate hide" id="fstate"><span id="count"></span><button class="textbtn" id="fclear" type="button">Сбросить</button></div>
 
   <div class="head" aria-hidden="true"><span>Желание</span><span>Он: степень / компромисс</span><span>Она: степень / компромисс</span><span></span></div>
   <div class="rows" id="rows"></div>
@@ -253,7 +260,7 @@ const ROLES={"sevkic18@gmail.com":"a","rigova.sesh@gmail.com":"b"};
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const LVL=[["","—"],["must","Очень важно"],["want","Хочу"],["meh","Всё равно"],["no","Против"]];
 const CMP=[["","—"],["yes","Да"],["maybe","Возможно"],["nope","Нет"]];
-const NOFILTER={lvl:"",cmp:"",diff:false};
+const NOFILTER={lvl:"",cmp:"",diff:false,author:""};
 const FLASH_MS=2400;
 let role=null,myEmail="",items=[],fl={...NOFILTER},channel=null,shownFor=null,pending=false,busy=false,statusTimer=null,flashId=null,flashAt=0,flashTimer=null;
 const $=s=>document.querySelector(s);
@@ -287,6 +294,11 @@ function flash(msg){
   clearTimeout(statusTimer);statusTimer=setTimeout(()=>s.classList.add("hide"),4000);
 }
 function pass(it){
+  if(fl.author){
+    const ar=roleOf(it.author_email),mine=ar&&ar===role;
+    if(fl.author==="me"&&!mine)return false;
+    if(fl.author==="other"&&(!ar||mine))return false;
+  }
   if(fl.lvl&&it.a_lvl!==fl.lvl&&it.b_lvl!==fl.lvl)return false;
   if(fl.cmp&&it.a_cmp!==fl.cmp&&it.b_cmp!==fl.cmp)return false;
   if(fl.diff&&!(it.a_lvl&&it.b_lvl&&it.a_lvl!==it.b_lvl))return false;
@@ -294,12 +306,13 @@ function pass(it){
 }
 
 /* фильтры живут в шторке; кнопка показывает, сколько из них включено */
-const nFilters=()=>(fl.lvl?1:0)+(fl.cmp?1:0)+(fl.diff?1:0);
+const nFilters=()=>(fl.lvl?1:0)+(fl.cmp?1:0)+(fl.diff?1:0)+(fl.author?1:0);
 function renderFilters(){
-  const fsel=(label,key,L)=>`<label class="fsel"><span class="flabel">${label}</span><select data-fk="${key}">${
+  const AUTH=[["me","Только мои"],["other",`Только ${role==="a"?"её":role==="b"?"его":"чужие"}`]];
+  const fsel=(label,key,L,cls="")=>`<label class="fsel${cls}"><span class="flabel">${label}</span><select data-fk="${key}">${
     [["","Все"],...L.filter(o=>o[0])].map(o=>`<option value="${o[0]}"${fl[key]===o[0]?" selected":""}>${o[1]}</option>`).join("")
   }</select></label>`;
-  $("#fbody").innerHTML=`<div class="fsels">${fsel("Степень желания","lvl",LVL)}${fsel("Компромисс","cmp",CMP)}</div>
+  $("#fbody").innerHTML=`<div class="fsels">${fsel("Степень желания","lvl",LVL)}${fsel("Компромисс","cmp",CMP)}${fsel("Чьи желания","author",AUTH," full")}</div>
   <label class="frow"><span>Только расхождения<small>Степени желания у вас разные</small></span><input type="checkbox" class="sw" id="fdiff"${fl.diff?" checked":""}></label>`;
   syncFilters();
 }
@@ -307,7 +320,7 @@ function syncFilters(){
   document.querySelectorAll("#fbody select").forEach(s=>s.classList.toggle("on",!!fl[s.dataset.fk]));
   const n=nFilters(),b=$("#fcount");
   b.textContent=String(n);b.classList.toggle("hide",!n);
-  $("#fbtn").classList.toggle("on",!!n);
+  $("#fbtn").setAttribute("aria-label",n?`Фильтры: ${n}`:"Фильтры");
   $("#freset").disabled=!n;
 }
 
@@ -343,6 +356,7 @@ function render(){
     :`<div class="empty">${items.length?"Ничего не подходит под фильтр":"Пока пусто — добавьте первое желание выше"}</div>`;
   document.querySelectorAll("textarea.name").forEach(autosize);
   renderStats();updateBell();
+  $("#fstate").classList.toggle("hide",!n);
   $("#count").textContent=n?`Показано ${list.length} из ${items.length}`:"";
   $("#fshow").textContent=n?`Показать ${list.length} из ${items.length}`:"Готово";
 }
@@ -460,7 +474,9 @@ document.querySelectorAll(".sheet").forEach(s=>s.addEventListener("click",e=>{
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeSheet();});
 $("#fbtn").onclick=()=>openSheet("fsheet");
 $("#bell").onclick=()=>openSheet("sheet");
-$("#freset").onclick=()=>{fl={...NOFILTER};renderFilters();render();};
+const resetFilters=()=>{fl={...NOFILTER};renderFilters();render();};
+$("#freset").onclick=resetFilters;
+$("#fclear").onclick=resetFilters;
 
 /* уведомления: что нового от партнёра с момента последнего визита */
 let baseline=0,hiddenAt=0;
