@@ -182,6 +182,14 @@ button{font:inherit;color:inherit}
 .pp.s-agree{background:var(--acc-soft);color:var(--acc-ink)}
 .pp.s-diff{background:var(--warn-bg);color:var(--warn-ink)}
 .tag{display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:999px;background:var(--acc);color:var(--on-acc);font-size:11px;font-weight:800;white-space:nowrap}
+/* мышь: крестик, как раньше; касание: свайп влево и красный блок с корзиной */
+.x{display:none;grid-column:2;grid-row:1;width:44px;height:44px;border:0;background:none;color:var(--mut);font-size:24px;line-height:1;cursor:pointer;border-radius:8px;transition:transform 160ms var(--ease-out)}
+.x:active{transform:scale(.97)}
+@media (hover:hover) and (pointer:fine){
+ .row{grid-template-columns:1fr 44px}
+ .x{display:block}
+ .del{display:none!important}
+}
 .who{grid-column:1/-1;display:grid;grid-template-columns:34px 1fr 1fr;gap:6px;align-items:center;padding-right:4px}
 .cols{grid-column:1/-1;display:grid;grid-template-columns:34px 1fr 1fr;gap:6px;padding-right:4px;margin-bottom:-2px;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--mut)}
 .cols span{padding-left:2px}
@@ -244,7 +252,7 @@ select:disabled.c-none{color:var(--mut);-webkit-text-fill-color:var(--mut)}
 .status.on{opacity:1;transform:translate(-50%,0);visibility:visible;transition-delay:0s}
 
 @media (prefers-reduced-motion:reduce){
- .ibtn:active,.fbtn:active,.ghost:active,.primary:active,.login button:active,.sheet-x:active,.add button:active,.stat:active,.cell:active,.del:active{transform:none}
+ .ibtn:active,.fbtn:active,.ghost:active,.primary:active,.login button:active,.sheet-x:active,.add button:active,.stat:active,.cell:active,.del:active,.x:active{transform:none}
  .tbtn svg,.tbtn .sun,.tbtn .moon{transform:none!important}
  .sheet-panel,.sheet.open .sheet-panel{transform:none!important;transition:opacity 150ms ease!important}
  .sheet:not(.open) .sheet-panel{opacity:0}.sheet.open .sheet-panel{opacity:1}
@@ -275,6 +283,7 @@ select:disabled.c-none{color:var(--mut);-webkit-text-fill-color:var(--mut)}
  .row{border:0;border-bottom:1px solid var(--line);border-radius:0;padding:6px 12px}
  .rw:last-child .row{border-bottom:0}
  .del{top:6px;bottom:6px;right:8px;border-radius:12px}
+ .x{width:36px;height:36px}
  .nm{grid-column:1;grid-row:1}
  .nm .name{min-height:30px;padding:0 4px 6px}
  .nm .name:first-child{min-height:36px;padding:7px 4px}
@@ -282,6 +291,10 @@ select:disabled.c-none{color:var(--mut);-webkit-text-fill-color:var(--mut)}
  .who{grid-row:1;grid-template-columns:1fr 1fr;padding-right:0}
  .who.a{grid-column:2}.who.b{grid-column:3}
  .wl,.cols{display:none}
+ .x{grid-column:4}
+}
+@media (min-width:760px) and (hover:hover) and (pointer:fine){
+ .head,.row{grid-template-columns:minmax(180px,1fr) 300px 300px 36px}
 }
 </style>
 </head>
@@ -480,6 +493,7 @@ const rowHtml=it=>{
   const el=Date.now()-flashAt,fresh=it.id===flashId&&el<FLASH_MS;
   return `<div class="rw${own?" own":""}" data-rw="${it.id}"><div class="row${ar?" own-"+ar:""}${fresh?" fresh":""}" data-row="${it.id}"${fresh?` style="animation-delay:-${el}ms"`:""}>
   <div class="nm">${by}<textarea class="name" rows="1" maxlength="200" data-id="${it.id}" aria-label="Желание"${own?"":" readonly"}>${esc(it.text)}</textarea></div>
+  ${own?`<button class="x" type="button" data-del="${it.id}" aria-label="Удалить">×</button>`:""}
   <div class="cols" aria-hidden="true"><i></i><span>Степень</span><span>Компромисс</span></div>
   <div class="who a${role==="a"?" me":""}"><span class="wl">Он</span>${sel(LVL,it.id,"a_lvl",it.a_lvl,"a","Он: степень")}${sel(CMP,it.id,"a_cmp",it.a_cmp,"a","Он: компромисс")}</div>
   <div class="who b${role==="b"?" me":""}"><span class="wl">Она</span>${sel(LVL,it.id,"b_lvl",it.b_lvl,"b","Она: степень")}${sel(CMP,it.id,"b_cmp",it.b_cmp,"b","Она: компромисс")}</div>
@@ -575,7 +589,10 @@ document.addEventListener("click",async e=>{
     renderFilters();render();return;
   }
   if(t.dataset.retry!==undefined){loadErr=false;render();load();return;}
-  if(t.dataset.del){removeWish(t.dataset.del,t.closest(".rw"));return;}
+  if(t.dataset.del){
+    if(t.classList.contains("x")&&!confirm("Удалить желание?"))return;   // крестик (мышь) — с подтверждением, корзина после свайпа — без
+    removeWish(t.dataset.del,t.closest(".rw"));return;
+  }
 });
 document.addEventListener("change",async e=>{
   const t=e.target;
@@ -604,7 +621,8 @@ document.addEventListener("keydown",e=>{
 window.addEventListener("resize",()=>document.querySelectorAll("textarea.name").forEach(autosize));
 
 
-/* свайп влево по своей карточке */
+/* свайп влево по своей карточке (только касание; на мыши — крестик) */
+const MOUSE=matchMedia("(hover: hover) and (pointer: fine)");
 const GAP=8;let openId=null,sw=null,swiped=0;
 const rwOf=id=>document.querySelector(`.rw[data-rw="${id}"]`);
 function swW(rw){const d=rw.querySelector(".del");return d.offsetWidth+(parseFloat(getComputedStyle(d).right)||0)+GAP;}
@@ -630,6 +648,7 @@ function restoreSwipe(){
   setX(rw,-swW(rw),false);
 }
 document.addEventListener("pointerdown",e=>{
+  if(MOUSE.matches)return;
   const rw=e.target.closest&&e.target.closest(".rw.own");
   if(openId&&(!rw||rw.dataset.rw!==openId)&&!(e.target.closest&&e.target.closest(".del")))closeSwipe();
   if(!rw||e.target.closest(".del"))return;
@@ -665,6 +684,7 @@ document.addEventListener("click",e=>{if(Date.now()-swiped<350){e.stopPropagatio
 /* трекпад: свайп двумя пальцами */
 let wheelAt=0;
 document.addEventListener("wheel",e=>{
+  if(MOUSE.matches)return;
   const rw=e.target.closest&&e.target.closest(".rw.own");
   if(!rw||Math.abs(e.deltaX)<Math.abs(e.deltaY)*1.5||Date.now()-wheelAt<450)return;
   if(e.deltaX>24){wheelAt=Date.now();if(openId===rw.dataset.rw)removeWish(rw.dataset.rw,rw);else openSwipe(rw.dataset.rw);}
