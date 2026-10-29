@@ -18,17 +18,20 @@
 --must:#fde2d3;--want:#fdf0c8;--meh:#ece9e3;--no:#dfe3f3;--yes:#c3ebd0;--maybe:#fdf0c8;--nope:#f6d5d5;
 --a-bg:#dce9df;--a-line:#b4cdba;--a-tx:#1f6b3a;--a-hi:#a6dbb6;
 --b-bg:#f7e6eb;--b-line:#e3bcc7;--b-tx:#8a1c3d;--b-hi:#f2b2c4;--n-hi:#fbd9bf;
+--must-d:#e2561a;--want-d:#d49a00;--meh-d:#9a948a;--no-d:#5b6fd0;--yes-d:#2f9e5e;--maybe-d:#d49a00;--nope-d:#d64545;
 color-scheme:light;
 --ease-out:cubic-bezier(0.23,1,0.32,1);--ease-in-out:cubic-bezier(0.77,0,0.175,1);--ease-drawer:cubic-bezier(0.32,0.72,0,1);
 --chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%237a746b' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171614;--surf:#211f1c;--tx:#f1ede6;--mut:#9b948a;--line:#35322d;--acc:#fb923c;--on-acc:#1f1d1a;
 --must:#5a2f18;--want:#554714;--meh:#34312c;--no:#2b3252;--yes:#1f4a2c;--maybe:#554714;--nope:#5a2424;
 --a-bg:#17261c;--a-line:#2a4733;--a-tx:#86d1a0;--a-hi:#25663d;
---b-bg:#2c1820;--b-line:#4f2a37;--b-tx:#e58ca5;--b-hi:#722d46;--n-hi:#6b3b20;color-scheme:dark}}
+--b-bg:#2c1820;--b-line:#4f2a37;--b-tx:#e58ca5;--b-hi:#722d46;--n-hi:#6b3b20;
+--must-d:#fb923c;--want-d:#e6b422;--meh-d:#8d867c;--no-d:#8fa0f0;--yes-d:#4cc47f;--maybe-d:#e6b422;--nope-d:#f06b6b;color-scheme:dark}}
 :root[data-theme="dark"]{--bg:#171614;--surf:#211f1c;--tx:#f1ede6;--mut:#9b948a;--line:#35322d;--acc:#fb923c;--on-acc:#1f1d1a;
 --must:#5a2f18;--want:#554714;--meh:#34312c;--no:#2b3252;--yes:#1f4a2c;--maybe:#554714;--nope:#5a2424;
 --a-bg:#17261c;--a-line:#2a4733;--a-tx:#86d1a0;--a-hi:#25663d;
---b-bg:#2c1820;--b-line:#4f2a37;--b-tx:#e58ca5;--b-hi:#722d46;--n-hi:#6b3b20;color-scheme:dark}
+--b-bg:#2c1820;--b-line:#4f2a37;--b-tx:#e58ca5;--b-hi:#722d46;--n-hi:#6b3b20;
+--must-d:#fb923c;--want-d:#e6b422;--meh-d:#8d867c;--no-d:#8fa0f0;--yes-d:#4cc47f;--maybe-d:#e6b422;--nope-d:#f06b6b;color-scheme:dark}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,"SF Pro Text","Segoe UI",Roboto,sans-serif;touch-action:manipulation}
@@ -57,11 +60,20 @@ button{font:inherit;color:inherit}
 
 /* статистика */
 .stats{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:8px;margin-bottom:10px}
-.stat{min-width:0;background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+.stat{display:block;width:100%;min-width:0;margin:0;background:var(--surf);color:var(--tx);border:1px solid var(--line);border-radius:12px;padding:8px 10px;text-align:left;font:inherit;cursor:pointer;
+ transition:background-color 200ms ease,color 200ms ease,border-color 200ms ease,transform 160ms var(--ease-out)}
+.stat:active{transform:scale(.97)}
+.stat:disabled{cursor:default;opacity:.6}
 .stat b{display:block;font-size:22px;line-height:1.15;font-variant-numeric:tabular-nums}
 .stat span{display:block;font-size:11px;color:var(--mut);white-space:nowrap}
 .stat.sa{background:var(--a-bg);border-color:var(--a-line)}.stat.sa b{color:var(--a-tx)}
 .stat.sb{background:var(--b-bg);border-color:var(--b-line)}.stat.sb b{color:var(--b-tx)}
+/* выбранная плитка: цвета меняются местами */
+.stat.on{background:var(--tx);border-color:var(--tx);color:var(--bg)}
+.stat.sa.on{background:var(--a-tx);border-color:var(--a-tx);color:var(--a-bg)}
+.stat.sb.on{background:var(--b-tx);border-color:var(--b-tx);color:var(--b-bg)}
+.stat.on b,.stat.on span{color:inherit}
+.stat.on span{opacity:.85}
 
 /* кнопка фильтров */
 .bar{display:flex;gap:8px;margin-bottom:14px}
@@ -134,9 +146,11 @@ select{appearance:none;-webkit-appearance:none;width:100%;min-width:0;height:44p
  border:1px solid var(--line);border-radius:10px;padding:0 28px 0 10px;background-color:var(--surf);background-image:var(--chev);background-repeat:no-repeat;background-position:right 10px center;text-overflow:ellipsis;transition:background-color 200ms ease,color 200ms ease}
 select:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
 select.c-none{color:var(--mut)}
-select.c-must{background-color:var(--must)}select.c-want{background-color:var(--want)}select.c-meh{background-color:var(--meh)}select.c-no{background-color:var(--no)}
-select.c-yes{background-color:var(--yes)}select.c-maybe{background-color:var(--maybe)}select.c-nope{background-color:var(--nope)}
-select:disabled{background-image:none;padding-right:10px;border-color:transparent;opacity:1;color:var(--tx);-webkit-text-fill-color:var(--tx)}
+select.c-must{background-color:var(--must);--dotc:var(--must-d)}select.c-want{background-color:var(--want);--dotc:var(--want-d)}select.c-meh{background-color:var(--meh);--dotc:var(--meh-d)}select.c-no{background-color:var(--no);--dotc:var(--no-d)}
+select.c-yes{background-color:var(--yes);--dotc:var(--yes-d)}select.c-maybe{background-color:var(--maybe);--dotc:var(--maybe-d)}select.c-nope{background-color:var(--nope);--dotc:var(--nope-d)}
+/* только чтение: не поле, а значение: без рамки, заливки и стрелки, с цветной точкой слева */
+select:disabled{background-color:transparent;background-image:radial-gradient(circle,var(--dotc,transparent) 0 4px,transparent 4.6px);background-size:10px 10px;background-repeat:no-repeat;background-position:2px center;
+ padding:0 4px 0 20px;border-color:transparent;opacity:1;color:var(--tx);-webkit-text-fill-color:var(--tx);cursor:default}
 select:disabled.c-none{color:var(--mut);-webkit-text-fill-color:var(--mut)}
 .empty{padding:28px 12px;text-align:center;color:var(--mut)}
 
@@ -375,9 +389,9 @@ function syncFilters(){
 function renderStats(){
   const by={a:0,b:0};
   items.forEach(i=>{const r=roleOf(i.author_email);if(r)by[r]++;});
-  $("#stats").innerHTML=`<div class="stat"><b>${items.length}</b><span>Всего желаний</span></div>
-  <div class="stat sa"><b>${by.a}</b><span>Добавил Он</span></div>
-  <div class="stat sb"><b>${by.b}</b><span>Добавила Она</span></div>`;
+  const on=k=>k==="all"?!fl.author:!!role&&fl.author===(role===k?"me":"other");
+  const tile=(k,cls,n,label)=>`<button type="button" class="stat${cls}${on(k)?" on":""}" data-q="${k}" aria-pressed="${on(k)}"${k!=="all"&&!role?" disabled":""}><b>${n}</b><span>${label}</span></button>`;
+  $("#stats").innerHTML=tile("all","",items.length,"Всего желаний")+tile("a"," sa",by.a,"Добавил Он")+tile("b"," sb",by.b,"Добавила Она");
 }
 
 const roleOf=e=>ROLES[(e||"").toLowerCase()];
@@ -457,6 +471,11 @@ $("#login").addEventListener("submit",async e=>{
 
 document.addEventListener("click",async e=>{
   const t=e.target.closest("button");if(!t)return;
+  if(t.dataset.q){          // плитка статистики = быстрый фильтр по автору; повторный клик возвращает «Всего»
+    const v=t.dataset.q,target=v==="all"?"":(role===v?"me":"other");
+    fl.author=(v==="all"||fl.author===target)?"":target;
+    renderFilters();render();return;
+  }
   if(t.dataset.del&&confirm("Удалить желание?")){
     const row=t.closest(".row");
     if(row&&!calm()){row.style.height=row.offsetHeight+"px";void row.offsetHeight;row.classList.add("leaving");leaveUntil=Date.now()+300;}
