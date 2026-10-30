@@ -383,8 +383,10 @@ const LVL=[["","—"],["must","Очень важно"],["want","Хочу"],["meh
 const CMP=[["","—"],["yes","Да"],["maybe","Возможно"],["nope","Нет"]];
 const NOFILTER={lvl:"",cmp:"",state:"",author:""};
 const STATES=[["agree","Совпали"],["diff","Спорим"],["wait","Без ответа"]];
-/* состояние желания: у обоих есть степень и она одинаковая / разная / ответа ещё нет */
-const stateOf=it=>!(it.a_lvl&&it.b_lvl)?"wait":it.a_lvl===it.b_lvl?"agree":"diff";
+/* состояние желания: «Спорим» только когда один против («Против»), а другой хочет («Очень важно» или «Хочу»).
+   «Хочу» и «Всё равно» спора не дают; пока кто-то не ответил — «Без ответа» */
+const POS=["must","want"];
+const stateOf=it=>!(it.a_lvl&&it.b_lvl)?"wait":((it.a_lvl==="no"&&POS.includes(it.b_lvl))||(it.b_lvl==="no"&&POS.includes(it.a_lvl)))?"diff":"agree";
 const FLASH_MS=2400;
 let loaded=false,loadErr=false,role=null,myEmail="",items=[],fl={...NOFILTER},channel=null,shownFor=null,pending=false,busy=false,statusTimer=null,flashId=null,flashAt=0,flashTimer=null;
 const $=s=>document.querySelector(s);
